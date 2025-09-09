@@ -15,7 +15,7 @@ const Home = () => {
 
       {/* Navbar */}
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-violet-50 px-15 py-15">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-violet-50 py-15">
         <div className="relative grid place-items-center mt-20 font-sans gap-12 overflow-hidden">
           {/* 🔵 Floating Shapes */}
           <motion.div
@@ -44,7 +44,7 @@ const Home = () => {
             initial={{ opacity: 0, x: -60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1 }}
-            className="space-y-6 text-center max-w-2xl relative z-10"
+            className="space-y-6 text-center max-w-2xl relative z-10 px-10"
           >
             <p className="text-sm text-[#0d0c22] uppercase tracking-widest">
               Your Gateway to Knowledge
@@ -55,7 +55,7 @@ const Home = () => {
             </p>
             <p className="text-gray-700 text-base md:text-lg leading-relaxed">
               LeafLine is your personal digital Study hub. Access thousands of books
-              across all genres — read online or download and take them anywhere.
+              across all genres read online or download and take them anywhere.
             </p>
             <div className="flex justify-center space-x-4 pt-4">
               <Link to={"/auth/signup"}>
@@ -75,7 +75,7 @@ const Home = () => {
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1 }}
-            className="relative h-[400px] w-full flex justify-center z-10"
+            className="relative h-[400px] w-full flex justify-center z-10 px-10"
           >
             <motion.img
               src={HomeImage}
