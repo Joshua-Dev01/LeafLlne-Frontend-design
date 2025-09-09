@@ -181,7 +181,7 @@ const Register = () => {
             {/* Switch to login */}
             <p className="text-xs text-[#7b7194] text-center">
               Already have an account?{" "}
-              <Link to="/login" className="underline">
+              <Link to="/auth/login" className="underline">
                 Sign in
               </Link>
             </p>

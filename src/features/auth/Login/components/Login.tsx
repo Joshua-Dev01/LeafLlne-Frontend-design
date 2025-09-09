@@ -125,13 +125,13 @@ const Login = () => {
 
             {/* Forgot password */}
             <p className="text-xs text-[#7b7194] text-center !mt-6 underline cursor-pointer">
-              <Link to="/forgot-password">Forgot password?</Link>
+              <Link to="/auth/forgot-password">Forgot password?</Link>
             </p>
 
             {/* Sign up */}
             <p className="text-xs text-[#7b7194] text-center mt-4">
               Don’t have an account?{" "}
-              <Link to="/register" className="underline ">
+              <Link to="/auth/signup" className="underline ">
                 Sign up
               </Link>
             </p>

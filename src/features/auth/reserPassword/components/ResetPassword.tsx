@@ -103,7 +103,7 @@ const ResetPassword = () => {
         {/* Login link */}
         <p className="text-xs text-gray-600">
           Remember your password?{" "}
-          <Link to="/login" className=" underline">
+          <Link to="/auth/login" className=" underline">
             Go to Login
           </Link>
         </p>

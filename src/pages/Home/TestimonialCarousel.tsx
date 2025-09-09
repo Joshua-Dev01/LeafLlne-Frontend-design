@@ -43,7 +43,7 @@ const TestimonialCarousel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        What Readers Are Saying
+        What our users said 
       </motion.h2>
 
       {/* Carousel Container */}

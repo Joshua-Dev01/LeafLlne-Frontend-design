@@ -1,35 +1,47 @@
-// src/routes/AppRouter.tsx
-import { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
-import FullScreenLoader from "../components/loading/loading";
-import Register from "../features/auth/register/components/SignUp";
-import Login from "../features/auth/Login/components/Login";
-import ForgotPassword from "../features/auth/forgottenPassword/components/ForgotPassword";
-import ResetPassword from "../features/auth/reserPassword/components/ResetPassword";
-import ProtectedRoute from "./ProtectedRoute";
-import DashboardLayout from "../pages/Dashboard/components/DashboardLayout";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Suspense } from "react";
+import Home from "../pages/Home/Home";
+import authRoutes from "../features/auth/routes/AuthRoutes";
 
-const Home = lazy(() => import("../pages/Home/Home"));
+import FullScreenLoader from "../components/loading/loading";
+import Nopage from "../components/NoPage/NoPage";
+import DashboardRoutes from "../pages/Dashboard/routes/DashboardRoutes";
+import AboutUs from "../pages/about/About";
+import Contact from "../pages/contact/Contact";
+
+
+const router = createBrowserRouter([
+  {
+    path: "*",
+    element: <Nopage />,
+  },
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/about",
+    element: <AboutUs />
+  },
+    {
+    path: "/contact",
+    element: <Contact />
+  },
+  {
+    path: "/auth",
+    children: [...authRoutes],
+  },
+  {
+    path: "/dashboard",
+   
+    children: [...DashboardRoutes],
+  },
+]);
 
 const AppRouter = () => {
   return (
     <Suspense fallback={<FullScreenLoader />}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<div>404 Page Not Found</div>} />
-      </Routes>
+      <RouterProvider router={router} />
     </Suspense>
   );
 };
