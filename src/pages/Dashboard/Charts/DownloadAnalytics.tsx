@@ -19,7 +19,7 @@ const DownloadAnalytics: React.FC = () => {
       title: { text: "Downloads" }
     },
     colors: ["#4f46e5"],
-    stroke: { curve: "smooth", width: 3 },
+    stroke: { curve: "smooth", width: 3 } as const,
     dataLabels: { enabled: false },
     grid: { borderColor: "#e5e7eb" }
   };
