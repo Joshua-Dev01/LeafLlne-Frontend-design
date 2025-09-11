@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Form, InputNumber, Button } from "antd";
+import { Modal, Form, Button } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import type { CreateSubjectPayload } from "../../types/Note";
 import { addSubjectApi } from "../../api/subject.api";
