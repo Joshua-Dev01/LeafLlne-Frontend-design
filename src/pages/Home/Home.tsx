@@ -54,8 +54,7 @@ const Home = () => {
             </p>
             <p className="text-gray-700 text-base md:text-lg leading-relaxed">
               LeafLine is your personal digital Study hub. Access thousands of
-              books across all genres read online or download and take them
-              anywhere.
+              studing and also  read online books and arranging your notes
             </p>
             <div className="flex justify-center space-x-4 pt-4">
               <Link to={"/auth/signup"}>
