@@ -4,16 +4,16 @@ import {
   BookOpen,
   BarChart2,
   FolderKanban,
-  FileSpreadsheet,
   ChevronDown,
   Home,
   User,
   Library,
   Headphones,
+  PanelLeftOpen, 
+  NotebookIcon
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { RiMenu2Line } from "react-icons/ri";
 
 const LeaflineSidebar = () => {
   const location = useLocation();
@@ -58,19 +58,17 @@ const LeaflineSidebar = () => {
 
   return (
     <aside
-      className={`bg-[#0d0c22] text-white h-full p-2 shadow-md transition-all duration-300 ${collapsed ? "w-20" : "w-60"
+      className={`bg-[#090909] text-white h-full p-2 shadow-md transition-all duration-300 ${collapsed ? "w-20" : "w-60"
         }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-2 py-4">
-        {!collapsed && (
-          <h2 className="text-xl font-bold whitespace-nowrap">📚LeafLine</h2>
-        )}
+       
         <button
           className="text-white hover:text-green-500 transition"
           onClick={toggleSidebar}
         >
-          <RiMenu2Line className="w-7 h-7  cursor-pointer " />
+          <PanelLeftOpen  className="w-5 h-5  cursor-pointer " />
         </button>
       </div>
 
@@ -82,13 +80,9 @@ const LeaflineSidebar = () => {
           active={isActive("/")}
           collapsed={collapsed}
         />
-        <SidebarItem
-          icon={User}
-          text="My Profile"
-          path="/profile"
-          active={isActive("/profile")}
-          collapsed={collapsed}
-        />
+
+       
+       
 
         {/* Dropdowns */}
         {Object.entries(dropdownMenus).map(([menuId, menu]) => {
@@ -135,6 +129,14 @@ const LeaflineSidebar = () => {
 
         {/* Static */}
 
+          <SidebarItem
+          icon={NotebookIcon}
+          text="Notes"
+          path="/notes"
+          active={isActive("/notes")}
+          collapsed={collapsed}
+        />
+
         <SidebarItem
           icon={BarChart2}
           text="Analytics"
@@ -149,13 +151,7 @@ const LeaflineSidebar = () => {
           active={isActive("/projects")}
           collapsed={collapsed}
         />
-        <SidebarItem
-          icon={FileSpreadsheet}
-          text="Finance"
-          path="/finance"
-          active={isActive("/finance")}
-          collapsed={collapsed}
-        />
+       
 
         {/* Settings */}
         <div>

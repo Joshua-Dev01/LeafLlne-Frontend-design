@@ -16,7 +16,7 @@ const DashboardLayout = () => {
   }, []);
 
   return (
-    <div className="h-screen flex overflow-hidden font-sans">
+    <div className="h-screen flex overflow-hidden font-sans bg-[#101012]">
       {/* Sidebar for Desktop */}
       <div className="hidden md:block ">
         <LeaflineSidebar />
@@ -53,13 +53,13 @@ const DashboardLayout = () => {
             onClick={() => setIsMobileSidebarOpen(true)}
             className="md:hidden text-blue-600 !text-2xl"
           >
-            <RiMenu2Line />
+            <RiMenu2Line className="text-gray-100" />
           </button>
           <Navbar userName={userName} />
         </div>
 
         {/* Routed Page Content */}
-        <main className="p-4 flex-1 bg-gray-100 overflow-auto">
+        <main className="py-4 px-20 flex-1  overflow-auto">
           <Outlet />
         </main>
       </div>

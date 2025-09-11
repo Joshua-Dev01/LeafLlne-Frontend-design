@@ -9,6 +9,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-primary-white: #f9fafb ;
+  --color-primary-dark: #101012 ;
+}
+
 /* index.css or App.css */
 .flip-card {
   perspective: 1000px;
@@ -38,6 +43,40 @@
 .flip-back {
   transform: rotateY(180deg);
 }
+
+.custom-search-modal .ant-modal-content {
+  background-color: #1e1e1e !important; /* dark bg */
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.avatar-dropdown .ant-modal-content{
+  background-color: #1e1e1e !important;
+}
+.Result-custom .ant-Result-content {
+  color: beige !important;
+}
+
+
+.custom-dark-modal .ant-modal-content {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+  border-radius: 12px;
+}
+
+.custom-dark-modal .ant-modal-header {
+  background-color: #1a1a1a !important;
+  border-bottom: none !important;
+}
+
+.custom-dark-modal .ant-modal-body {
+  background-color: #1a1a1a !important;
+}
+
+.custom-dark-modal .ant-modal-footer {
+  border-top: none !important;
+}
+
 
 
 @theme inline {

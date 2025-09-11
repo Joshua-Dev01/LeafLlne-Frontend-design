@@ -104,7 +104,7 @@ const DashboardHome = () => {
     return (
          <div
         key={blog._id}
-        className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transition hover:shadow-lg"
+        className=" rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transition hover:shadow-lg"
         style={{ minHeight: "320px" }}
       >
         {/* Image Section */}

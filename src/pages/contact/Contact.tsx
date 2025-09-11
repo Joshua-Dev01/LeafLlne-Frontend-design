@@ -21,22 +21,20 @@ const Contact = () => {
       {/* Contact Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 pt-32">
         <div className="relative z-10 flex flex-col md:flex-row items-start justify-between gap-12 max-w-6xl w-full">
-          
           {/* LEFT SIDE - LeafLine Info */}
           <div className="flex-1 mt-32 font-sans">
             <p className="uppercase text-sm tracking-widest text-gray-500 font-semibold">
               We’re here to help you
             </p>
             <h2 className="text-4xl font-bold text-gray-900 leading-snug">
-              Discuss Your <span className="text-sky-600">LeafLine</span> Study Needs
+              Discuss Your <span className="text-sky-600">LeafLine</span> Study
+              Needs
             </h2>
             <p className="text-gray-600 max-w-md leading-relaxed">
-              At LeafLine, we make learning smarter, easier, and more collaborative. 
-              Whether you're a student or educator, we help you organize resources, 
-              share notes, and achieve your study goals.
+              At LeafLine, we make learning smarter, easier, and more
+              collaborative. Whether you're a student or educator, we help you
+              organize resources, share notes, and achieve your study goals.
             </p>
-
-           
           </div>
 
           {/* RIGHT SIDE - KEEPING FORM UNTOUCHED */}
@@ -58,7 +56,6 @@ const Contact = () => {
                 />
                 <Select
                   placeholder="Select Industry"
-                  
                   className="!w-full !h-12 !rounded-lg !border-2 !border-sky-500 focus:!border-sky-600 !bg-gray-50 !mb-10"
                   options={[
                     { value: "tech", label: "Technology" },

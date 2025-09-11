@@ -2,7 +2,9 @@
 import ProtectedRoute from "../../../routes/ProtectedRoute";
 import { ChartsAnalytics } from "../Charts/Charts";
 import DashboardLayout from "../components/DashboardLayout";
-import DashboardHome from "../DashboardHome/components/DashboardHome";
+// import DashboardHome from "../DashboardHome/components/DashboardHome";
+import { DashboardMainHome } from "../DashboardHome/components/DashboardMainHome";
+import { Subject } from "../Notes/components/Subject";
 import Projects from "../projects/Projects";
 
 const DashboardRoutes = [
@@ -16,11 +18,15 @@ const DashboardRoutes = [
     children: [
       {
         index: true,
-        element: <DashboardHome />,
+        element: <DashboardMainHome />,
       },
       {
         path: "projects",
         element: <Projects />,
+      },
+      {
+        path: "notes",
+        element: <Subject />,
       },
       {
         path: "analytics",

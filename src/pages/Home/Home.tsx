@@ -12,10 +12,9 @@ import Footer from "../../components/footer/Footer";
 const Home = () => {
   return (
     <div className="">
-
       {/* Navbar */}
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-violet-50 py-15">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-violet-50 px-6 md:px-15 pt-15">
         <div className="relative grid place-items-center mt-20 font-sans gap-12 overflow-hidden">
           {/* 🔵 Floating Shapes */}
           <motion.div
@@ -54,8 +53,9 @@ const Home = () => {
               <span className="text-green-900">LeafLine</span>
             </p>
             <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-              LeafLine is your personal digital Study hub. Access thousands of books
-              across all genres read online or download and take them anywhere.
+              LeafLine is your personal digital Study hub. Access thousands of
+              books across all genres read online or download and take them
+              anywhere.
             </p>
             <div className="flex justify-center space-x-4 pt-4">
               <Link to={"/auth/signup"}>
@@ -87,8 +87,6 @@ const Home = () => {
           </motion.div>
         </div>
       </div>
-
-
 
       <CategoriesSection />
       <FeatureSection />
