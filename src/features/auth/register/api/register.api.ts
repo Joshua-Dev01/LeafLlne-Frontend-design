@@ -7,5 +7,5 @@ import type {
 export const registerUser = async (
   data: RegisterData
 ): Promise<RegisterResponse> => {
-  return await apiPost<RegisterResponse, RegisterData>("/auth/register", data);
+  return await apiPost<RegisterResponse, RegisterData>("/auth/signup", data);
 };

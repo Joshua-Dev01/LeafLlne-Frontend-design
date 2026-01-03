@@ -4,6 +4,7 @@ import ForgotPassword from "../forgottenPassword/components/ForgotPassword";
 import Login from "../Login/components/Login";
 import Register from "../register/components/SignUp";
 import ResetPassword from "../reserPassword/components/ResetPassword";
+import VerfiyEmail from "../verifyEmail/components/VerfiyEmail";
 
 
 const authRoutes = [
@@ -22,6 +23,11 @@ const authRoutes = [
   {
     path: "reset-password",
     element: <ResetPassword />,
+  },
+
+  {
+    path: "verify-email",
+    element: <VerfiyEmail />,
   },
 ];
 

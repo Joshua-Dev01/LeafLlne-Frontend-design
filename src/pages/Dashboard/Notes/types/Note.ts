@@ -19,4 +19,5 @@ export interface SubjectsSummaryProps {
   totalCourses: number;
   totalUnits: number;
   loading?: boolean;
+  onSuccess?: () => void; 
 }

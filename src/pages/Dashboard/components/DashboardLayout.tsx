@@ -4,7 +4,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Outlet } from "react-router-dom";
 import Navbar from "./NavBar";
 import LeaflineSidebar from "./SideBar";
-import { RiMenu2Line } from "react-icons/ri";
+// import { RiMenu2Line } from "react-icons/ri";
+import { ThemeProvider } from "../../../context/theme";
+import { Menu } from "lucide-react";
 
 const DashboardLayout = () => {
   const [userName, setUserName] = useState("User");
@@ -16,7 +18,7 @@ const DashboardLayout = () => {
   }, []);
 
   return (
-    <div className="h-screen flex overflow-hidden font-sans bg-[#101012]">
+    <div className="h-screen flex overflow-hidden font-sans bg-blue-50  dark:bg-[#000000] ">
       {/* Sidebar for Desktop */}
       <div className="hidden md:block ">
         <LeaflineSidebar />
@@ -48,19 +50,21 @@ const DashboardLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col shadow-2xl">
         {/* Top Navbar */}
-        <div className="flex items-center px-5 py-2 d">
+        <div className="flex items-center  py-2 ">
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="md:hidden text-blue-600 !text-2xl"
+            className="md:hidden text-blue-600 !text-2xl px-5"
           >
-            <RiMenu2Line className="text-gray-100" />
+            <Menu className="text-black cursor-pointer dark:text-white   w-6 h-6" />
           </button>
           <Navbar userName={userName} />
         </div>
 
         {/* Routed Page Content */}
-        <main className="py-4 px-20 flex-1  overflow-auto">
-          <Outlet />
+        <main className="py-4 px-10 flex-1  overflow-auto">
+          <ThemeProvider>
+            <Outlet />
+          </ThemeProvider>
         </main>
       </div>
     </div>

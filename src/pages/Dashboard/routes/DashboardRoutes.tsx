@@ -1,15 +1,16 @@
-// ...existing code...
+// src/pages/Dashboard/routes/DashboardRoutes.tsx
 import ProtectedRoute from "../../../routes/ProtectedRoute";
-import { ChartsAnalytics } from "../Charts/Charts";
 import DashboardLayout from "../components/DashboardLayout";
-// import DashboardHome from "../DashboardHome/components/DashboardHome";
-import { DashboardMainHome } from "../DashboardHome/components/DashboardMainHome";
-import { Subject } from "../Notes/components/Subject";
-import Projects from "../projects/Projects";
+import SubjectsRouter from "../Notes/router/SubjectsRoutes";
+import SettingsRoutes from "../settings/routes/settingsRoutes";
+import Notifications from "../notifications/Notifications";
+import DashboardMainHome from "../DashboardHome/components/DashboardMainHome";
+import ViewNotePage from "../Notes/NotesFiles/components/ViewNote";
+import EventsRouter from "../Events/routes/eventsRoutes";
+import { Analytics } from "../Charts/analytics";
 
 const DashboardRoutes = [
   {
-    path: "/dashboard",
     element: (
       <ProtectedRoute>
         <DashboardLayout />
@@ -17,26 +18,26 @@ const DashboardRoutes = [
     ),
     children: [
       {
-        index: true,
-        element: <DashboardMainHome />,
+        index: true, // /dashboard
+        element: <DashboardMainHome userName="User" />,
       },
       {
-        path: "projects",
-        element: <Projects />,
+        path: "notifications", // /dashboard/projects
+        element: <Notifications />,
       },
       {
-        path: "notes",
-        element: <Subject />,
+        path: "projects", // /dashboard/projects
+        element: <ViewNotePage />,
       },
+      ...SubjectsRouter,
+      ...SettingsRoutes,
+      ...EventsRouter,
       {
-        path: "analytics",
-        element: <ChartsAnalytics />,
+        path: "analytics", // /dashboard/analytics
+        element: <Analytics />,
       },
-      // You can spread settings routes if needed:
-      // ...SettingsRoutes,
     ],
   },
 ];
 
 export default DashboardRoutes;
-// ...existing code...

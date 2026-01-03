@@ -5,10 +5,22 @@ export const apiGet = async <T>(url: string): Promise<T> => {
   return res.data;
 };
 
-export const apiPost = async <T, D>(url: string, data: D): Promise<T> => {
-  const res = await axiosInstance.post<T>(url, data);
+export const apiPost = async <T, D>(
+  url: string,
+  data: D,
+  config: Record<string, any> = {}
+): Promise<T> => {
+  const res = await axiosInstance.post<T>(url, data, {
+    ...config,
+   
+    headers: {
+      ...config.headers,
+    },
+  });
+
   return res.data;
 };
+
 
 export const apiPut = async <T, D>(url: string, data: D): Promise<T> => {
   const res = await axiosInstance.put<T>(url, data);

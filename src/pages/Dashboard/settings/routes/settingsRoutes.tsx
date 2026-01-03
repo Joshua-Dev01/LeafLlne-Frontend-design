@@ -1,18 +1,22 @@
 // must export array
 
-import { Settings } from "../settings";
+import { Settings } from "../components/settings";
 
 const SettingsRoutes = [
  
-   
-      {
-        index: true,
-        element: <Settings />,
-      },
-      {
-        path: "projects",
-        // element: <Projects />,
-      },
+   {
+      path: "settings",
+      children: [
+        {
+          index: true,
+          element: <Settings />,
+        },
+        // {
+        //   path: "addNotes",
+        //   element: <AddNotes />,
+        // },
+      ],
+    },
   
 ];
 

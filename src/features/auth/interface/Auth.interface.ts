@@ -29,6 +29,7 @@ export interface LoginResponse {
     name: string;
     email: string;
     role?: string;
+    isVerified: boolean;
   };
 }
 
@@ -39,6 +40,7 @@ export interface ForgotPasswordRequest {
 
 export interface ForgotPasswordResponse {
   message: string;
+  resetToken?: string; // Optional depending on backend flow
 }
 
 export interface ResetPasswordRequest {
@@ -48,4 +50,18 @@ export interface ResetPasswordRequest {
 
 export interface ResetPasswordResponse {
   message: string;
+}
+
+export interface GoogleLoginResponse {
+  credential: string; // the JWT token returned by Google
+  clientId: string;
+  message: string;
+
+  token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role?: string;
+  };
 }

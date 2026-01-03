@@ -6,14 +6,13 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 export default function FeatureSection() {
-
-    useEffect(() => {
-          AOS.init({
-              duration: 1000, // animation duration in ms
-              once: true, // whether animation should happen only once
-              offset: 100, // trigger point offset
-          });
-      }, []);
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+      offset: 100,
+    });
+  }, []);
 
   const features = [
     {
@@ -84,18 +83,19 @@ export default function FeatureSection() {
 
       <div className="max-w-6xl mx-auto px-6 text-center relative z-20 font-sans">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 my-16">
-          Why Choose <span className="text-indigo-900 font-bold">Study Hub?</span>
+          Why Choose{" "}
+          <span className="text-indigo-900 font-bold">Study Hub?</span>
         </h2>
         <p className="text-gray-600 max-w-2xl mx-auto my-20">
           Everything you need to organize your learning, connect with others,
           and achieve academic success.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-20" data-aos="fade-right" >
+        <div className="grid md:grid-cols-3 gap-8 mt-20" data-aos="fade-right">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className={`${feature.bg} p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 text-white`  }
+              className={`${feature.bg} p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 text-white`}
               whileHover={{ scale: 1.05 }}
             >
               <div className="flex justify-center mb-4">{feature.icon}</div>

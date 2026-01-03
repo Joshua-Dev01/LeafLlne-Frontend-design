@@ -1,17 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/autoplay";
 
-@import 'swiper/css';
-@import 'swiper/css/pagination';
-@import 'swiper/css/autoplay';
-
+@import "./styles/_variables.scss";
+@import "./styles/_keyframe-animations.scss";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-white: #f9fafb ;
-  --color-primary-dark: #101012 ;
+  --color-primary-white: #f9fafb;
+  --color-primary-dark: #101012;
 }
 
 /* index.css or App.css */
@@ -50,13 +51,12 @@
   padding: 0 !important;
 }
 
-.avatar-dropdown .ant-modal-content{
+.avatar-dropdown .ant-modal-content {
   background-color: #1e1e1e !important;
 }
 .Result-custom .ant-Result-content {
   color: beige !important;
 }
-
 
 .custom-dark-modal .ant-modal-content {
   background-color: #1a1a1a !important;
@@ -75,6 +75,96 @@
 
 .custom-dark-modal .ant-modal-footer {
   border-top: none !important;
+}
+
+
+/* --- Custom Tabs Styling --- */
+.custom-tabs .ant-tabs-nav {
+  margin: 0;
+  border: none !important; /* ❌ Remove white or gray border line */
+  background: transparent;
+}
+
+.custom-tabs .ant-tabs-tab {
+  color: #9ca3af; /* Tailwind gray-400 */
+  transition: all 0.3s ease;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem !important;
+}
+
+.custom-tabs .ant-tabs-tab:hover {
+  color: #60a5fa; /* Tailwind blue-400 on hover */
+}
+
+.custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #3b82f6 !important; /* Active tab text color (blue-500) */
+}
+
+/* --- Active Blue Underline --- */
+.custom-tabs .ant-tabs-ink-bar {
+  background: #3b82f6 !important; /* Tailwind blue-500 */
+  height: 3px !important;
+  border-radius: 9999px;
+  transition: all 0.4s ease;
+}
+
+/* --- Dark Mode --- */
+.dark .custom-tabs .ant-tabs-tab {
+  color: #d1d5db; /* Tailwind gray-300 */
+}
+
+.dark .custom-tabs .ant-tabs-tab:hover {
+  color: #60a5fa;
+}
+
+.dark .custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #3b82f6 !important;
+}
+
+.dark .custom-tabs .ant-tabs-ink-bar {
+  background: #573bf6 !important;
+}
+
+
+
+
+
+/* Customize scrollbar */
+::-webkit-scrollbar {
+  width: 9px;           /* width of the vertical scrollbar */
+  height: 9px;          /* height of the horizontal scrollbar */
+}
+
+/* Scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background: #f0f0f0;   /* light gray for light mode */
+  border-radius: 10px;
+}
+
+/* Scrollbar thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: #2f009e;   /* Tailwind blue-500 */
+  border-radius: 10px;
+  border: 2px solid #f0f0f0; /* optional padding around thumb */
+}
+
+/* Thumb hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #270081;   /* darker blue on hover */
+}
+
+/* Use a CSS class for dark mode or prefer Tailwind dark variant */
+.dark ::-webkit-scrollbar-track {
+  background: #111;      /* dark background */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2b0091;   /* nice blue for dark mode */
+  border: 2px solid #111;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
 }
 
 

@@ -27,7 +27,7 @@ const Contact = () => {
               We’re here to help you
             </p>
             <h2 className="text-4xl font-bold text-gray-900 leading-snug">
-              Discuss Your <span className="text-sky-600">LeafLine</span> Study
+              Discuss Your <span className="text-[#0b083a]">LeafLine</span> Study
               Needs
             </h2>
             <p className="text-gray-600 max-w-md leading-relaxed">
@@ -44,19 +44,19 @@ const Contact = () => {
                 <Input
                   placeholder="Name"
                   data-aos="fade-right"
-                  className="!h-12 !rounded-lg !border-2 !border-sky-500 focus:!border-sky-600 !bg-gray-50 !mb-10"
+                  className="!h-12 !rounded-lg !border-2 !border-[#0b083a] focus:!border-sky-600 !bg-gray-50 !mb-10"
                   required
                 />
                 <Input
                   type="email"
                   placeholder="Email"
                   data-aos="fade-bottom"
-                  className="!h-12 !rounded-lg !border-2 !border-sky-500 focus:!border-sky-600 !bg-gray-50 !mb-10"
+                  className="!h-12 !rounded-lg !border-2 !border-[#0b083a] focus:!border-sky-600 !bg-gray-50 !mb-10"
                   required
                 />
                 <Select
                   placeholder="Select Industry"
-                  className="!w-full !h-12 !rounded-lg !border-2 !border-sky-500 focus:!border-sky-600 !bg-gray-50 !mb-10"
+                  className="!w-full !h-12 !rounded-lg !border-2 !border-[#0b083a] focus:!border-sky-600 !bg-gray-50 !mb-10"
                   options={[
                     { value: "tech", label: "Technology" },
                     { value: "edu", label: "Education" },
@@ -68,7 +68,7 @@ const Contact = () => {
                   placeholder="Message"
                   data-aos="fade-up"
                   rows={4}
-                  className="!rounded-lg !border-2 !border-sky-500 focus:!border-sky-600 !bg-gray-50 !mb-10"
+                  className="!rounded-lg !border-2 !border-[#0b083a] focus:!border-sky-600 !bg-gray-50 !mb-10"
                   required
                 />
 

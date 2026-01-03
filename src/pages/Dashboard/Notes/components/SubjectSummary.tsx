@@ -1,4 +1,4 @@
-import { Skeleton } from "antd";
+import { Skeleton } from "../../../../components/ui/skeleton";
 import type { SubjectsSummaryProps } from "../types/Note";
 import AddSubjectModal from "./AddSubjects/AddSubjects";
 
@@ -8,38 +8,49 @@ const SubjectsSummary: React.FC<SubjectsSummaryProps> = ({
   loading = false,
 }) => {
   return (
-    <div className=" mb-6 gap-5 p-5 bg-[#1f1f1f] rounded-2xl shadow text-white">
-      <div className="flex justify-between flex-wrap gap-7">
-        <div className="">
-          <p className="text-2xl font-bold mb-2 text-white">
-            Subjects Overview
+    <div className="mb-6 gap-5 p-6 rounded-2xl shadow-xl dark:bg-white/5 backdrop-blur-md border border-white/10 dark:text-black bg-white">
+      <div className="flex justify-between flex-wrap gap-7 text-dark dark:text-white">
+        {/* Left Section */}
+        <div>
+          <p className="text-2xl font-semiabold mb-2  tracking-wide ">
+            Subjects Overview ✨
           </p>
-          <p className="text-gray-300 mb-1">
-            Summary of your courses and units
+          <p className="text-gray-400 mb-4 text-sm">
+            Keep track of your academic progress
           </p>
 
-          <div className="flex flex-wrap gap-4 mt-3 text-gray-200 text-sm">
+          <div className="flex  gap-2 mt-2 text-sm">
             {loading ? (
-              <Skeleton className="h-7 w-32 rounded-full" />
+              <Skeleton className="h-5 w-40 rounded-xl" />
             ) : (
-              <span className="bg-blue-950 px-3 py-1 rounded-full">
-                Total Courses: {totalCourses}
-              </span>
+              <div className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg shadow-blue-900/40 text-white font-medium hover:scale-105 transition">
+                🎓 Total Courses: {totalCourses}
+              </div>
             )}
 
             {loading ? (
-              <Skeleton className="h-7 w-32 rounded-full" />
+              <Skeleton className="h-5 w-40 rounded-xl" />
             ) : (
-              <span className="bg-red-950 px-3 py-1 rounded-full">
-                Total Units: {totalUnits}
-              </span>
+              <div className="px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-pink-700 shadow-lg shadow-red-900/40 text-white font-medium hover:scale-105 transition">
+                📚 Total Units: {totalUnits}
+              </div>
             )}
           </div>
         </div>
-        <div>
+
+        {/* Right Section */}
+        <div className="flex items-center">
           <AddSubjectModal />
         </div>
       </div>
+
+      {/* Subtle divider */}
+      <div className="mt-5 border-t border-white/10"></div>
+
+      {/* Footer note */}
+      <p className="mt-3 text-xs text-gray-400 italic">
+        Stay consistent 📈 — every subject adds up to your success.
+      </p>
     </div>
   );
 };

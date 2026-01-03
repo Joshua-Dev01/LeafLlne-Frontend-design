@@ -1,7 +1,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import {  Star } from 'lucide-react';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -103,12 +103,12 @@ const TestimonialCarousel = () => {
         </Swiper>
 
         {/* Navigation Buttons (positioned far ends) */}
-        <div className="absolute -left-12 top-1/2 transform -translate-y-1/2 z-10 swiper-button-prev text-gray-700 cursor-pointer ">
+        {/* <div className="absolute -left-12 top-1/2 transform -translate-y-1/2 z-10 swiper-button-prev text-gray-700 cursor-pointer ">
           <ChevronLeft size={30} className="hover:text-black" />
         </div>
         <div className="absolute -right-12 top-1/2 transform -translate-y-1/2 z-10 swiper-button-next text-gray-700 cursor-pointer">
-          <ChevronRight size={30} className="hover:text-black" />
-        </div>
+          <ChevronRight size={30} className="hover:text-black md:hidden " />
+        </div> */}
       </div>
     </section>
   );

@@ -4,12 +4,12 @@ import type {
   ResetPasswordResponse,
 } from "../../interface/Auth.interface";
 
-// Reset password API
+// ✅ Fixed Reset password API
 export const resetPassword = async (
   data: ResetPasswordRequest
 ): Promise<ResetPasswordResponse> => {
-  return await apiPost<ResetPasswordResponse, ResetPasswordRequest>(
+  return await apiPost<ResetPasswordResponse, { password: string }>(
     `/auth/reset-password/${data.token}`,
-    { token: data.token, password: data.password }
+    { password: data.password }
   );
 };
