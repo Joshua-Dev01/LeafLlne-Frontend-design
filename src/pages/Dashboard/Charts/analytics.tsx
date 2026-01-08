@@ -1,8 +1,9 @@
-import AnalyticsDashboard from './EventAnalytics/EventChart'
-// import EventAnalyticsDashboard from './EventAnalytics/EventChart'
+import EventAnalyticsChart from "./EventAnalytics/EventChart";
 
 export const Analytics = () => {
   return (
-    <div><AnalyticsDashboard /></div>
-  )
+    <div>
+      <EventAnalyticsChart />
+    </div>
+  );
 }

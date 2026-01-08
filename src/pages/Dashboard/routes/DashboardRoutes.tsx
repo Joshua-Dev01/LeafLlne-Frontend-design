@@ -5,9 +5,9 @@ import SubjectsRouter from "../Notes/router/SubjectsRoutes";
 import SettingsRoutes from "../settings/routes/settingsRoutes";
 import Notifications from "../notifications/Notifications";
 import DashboardMainHome from "../DashboardHome/components/DashboardMainHome";
-import ViewNotePage from "../Notes/NotesFiles/components/ViewNote";
 import EventsRouter from "../Events/routes/eventsRoutes";
 import { Analytics } from "../Charts/analytics";
+import ProjectsWrapper from "../projects/ProjectsWrapper";
 
 const DashboardRoutes = [
   {
@@ -27,7 +27,7 @@ const DashboardRoutes = [
       },
       {
         path: "projects", // /dashboard/projects
-        element: <ViewNotePage />,
+        element: <ProjectsWrapper />,
       },
       ...SubjectsRouter,
       ...SettingsRoutes,

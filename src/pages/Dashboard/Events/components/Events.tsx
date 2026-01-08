@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Bell, Check, MoreHorizontal, Users } from "lucide-react";
-import { BsCalendarEventFill } from "react-icons/bs";
-import { PiUsersFill } from "react-icons/pi";
+import { MapPin, Bell, Check, MoreHorizontal, Users, Calendar } from "lucide-react";
 
-import { Button } from "../../../../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +12,7 @@ import {
 import { useToggleInterested, useToggleGoing } from "../hooks/eventHooks";
 import type { Event } from "../types/eventsTypes";
 import DeleteEventModal from "./DeleteEventModal";
+import { Button } from "../../../../components/ui/button";
 
 interface Props {
   event: Event;
@@ -88,108 +86,162 @@ export const EventCard = ({ event, currentUserId }: Props) => {
   /* =======================
       ATTENDANCE %
      ======================= */
-  const capacity = typeof event.capacity === "number" && event.capacity > 0 ? event.capacity : 100;
+  const capacity =
+    typeof event.capacity === "number" && event.capacity > 0
+      ? event.capacity
+      : 100;
   const attendancePercent = Math.min((goingUsers.length / capacity) * 100, 100);
+
+  // Format date more elegantly
+  const eventDate = new Date(event.date);
+  const monthDay = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const year = eventDate.getFullYear();
+  const time = eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.25 }}
-        className="relative bg-white dark:bg-[#1f1f23] rounded-3xl shadow-lg border border-gray-100 dark:border-zinc-700 overflow-hidden"
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="group relative bg-white dark:bg-zinc-900 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-black/20 border border-gray-200 dark:border-zinc-800 overflow-hidden transition-all duration-300"
       >
-        {/* TOP COUNTERS */}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#2c2c30] px-2 py-1 rounded-full">
-            <Bell size={14} />
-            <span className="text-sm font-medium">
-              {interestedUsers.length}
-            </span>
+        {/* Gradient accent top border */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+        
+        {/* Header with date badge and menu */}
+        <div className="relative px-6 pt-5 pb-4 border-b border-gray-100 dark:border-zinc-800">
+          <div className="flex items-start justify-between">
+            {/* Date Badge */}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center justify-center w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-lg shadow-violet-500/30 text-white">
+                <span className="text-xs font-semibold uppercase">{monthDay.split(' ')[0]}</span>
+                <span className="text-lg font-bold leading-none">{monthDay.split(' ')[1]}</span>
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Event Date</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{year}</span>
+              </div>
+            </div>
+
+            {/* Stats and Menu */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                <Bell size={14} className="flex-shrink-0" />
+                <span className="text-sm font-semibold">{interestedUsers.length}</span>
+              </div>
+
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-lg border border-emerald-200 dark:border-emerald-900/50">
+                <Users size={14} className="flex-shrink-0" />
+                <span className="text-sm font-semibold">{goingUsers.length}</span>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                    <MoreHorizontal size={18} className="text-gray-600 dark:text-gray-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setDeleteOpen(true)}
+                    className="text-red-600 dark:text-red-400"
+                  >
+                    Delete Event
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#2c2c30] px-2 py-1 rounded-full">
-            <PiUsersFill size={14} />
-            <span className="text-sm font-medium">{goingUsers.length}</span>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 rounded-full bg-white dark:bg-[#2c2c30]">
-                <MoreHorizontal size={16} />
-              </button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDeleteOpen(true)}
-                className="text-red-500"
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div className="p-5 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <BsCalendarEventFill size={16} className="text-purple-600" />
-            <span>{new Date(event.date).toDateString()}</span>
-          </div>
+        {/* Main Content */}
+        <div className="px-6 py-5">
+          {/* Title */}
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight">
+            {event.title}
+          </h3>
 
-          <h2 className="text-lg font-bold line-clamp-2">{event.title}</h2>
-
-          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
+          {/* Description */}
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
             {event.description}
           </p>
 
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <MapPin size={16} className="text-red-500" />
-            <span>{event.location}</span>
+          {/* Location and Time */}
+          <div className="space-y-2 mb-5">
+            <div className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
+              <div className="flex items-center justify-center w-8 h-8 bg-rose-50 dark:bg-rose-950/30 rounded-lg">
+                <MapPin size={16} className="text-rose-600 dark:text-rose-400" />
+              </div>
+              <span className="text-sm font-medium">{event.location}</span>
+            </div>
+            
+            <div className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <Calendar size={16} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="text-sm font-medium">{time}</span>
+            </div>
           </div>
 
-          {/* ATTENDANCE BAR */}
-          <div className="mt-2">
-            <div className="w-full bg-gray-200 dark:bg-zinc-700 h-2 rounded-full">
-              <div
-                className="bg-indigo-600 h-2 transition-all"
-                style={{ width: `${attendancePercent}%` }}
+          {/* Attendance Progress */}
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                Attendance
+              </span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                {goingUsers.length} / {capacity}
+              </span>
+            </div>
+            <div className="relative w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${attendancePercent}%` }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="absolute h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"
               />
             </div>
           </div>
 
-          {/* ACTION BUTTONS */}
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={handleInterestedClick}
-              className={`rounded-xl ${
+              className={`h-11 rounded-xl font-semibold transition-all duration-200 ${
                 isNotified
-                  ? "bg-yellow-400 hover:bg-yellow-500"
+                  ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30"
                   : isInterested
-                  ? "bg-indigo-600 hover:bg-indigo-700"
-                  : "bg-slate-800 hover:bg-slate-900"
+                  ? "bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/30"
+                  : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200"
               }`}
             >
-              {isNotified ? <Bell size={16} /> : <Check size={16} />}
-              {isNotified
-                ? "Notified"
-                : isInterested
-                ? "Interested"
-                : "Interest"}
+              <div className="flex items-center gap-2">
+                {isNotified ? (
+                  <Bell size={16} className="fill-current" />
+                ) : (
+                  <Check size={16} />
+                )}
+                <span className="text-sm">
+                  {isNotified ? "Notified" : isInterested ? "Interested" : "Interest"}
+                </span>
+              </div>
             </Button>
 
             <Button
               onClick={handleGoingClick}
-              className={`rounded-xl ${
+              className={`h-11 rounded-xl font-semibold transition-all duration-200 ${
                 isGoing
-                  ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-slate-800 hover:bg-slate-900"
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30"
+                  : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200"
               }`}
             >
-              <Users size={16} />
-              {isGoing ? "Going" : "Attend"}
+              <div className="flex items-center gap-2">
+                <Users size={16} />
+                <span className="text-sm">{isGoing ? "Going" : "Attend"}</span>
+              </div>
             </Button>
           </div>
         </div>

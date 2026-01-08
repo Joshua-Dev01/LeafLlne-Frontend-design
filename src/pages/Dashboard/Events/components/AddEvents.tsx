@@ -254,14 +254,13 @@ export const CreateEventForm: React.FC = () => {
             </div>
           </CardContent>
 
-          {/* FOOTER */}
           <div className="p-6 border-t dark:border-zinc-700">
             <Button
               type="submit"
               disabled={mutation.isPending}
               className="
-                bg-blue-950
-                text-white px-12 py-5 text-lg rounded-sm
+                !bg-indigo-900 hover:!bg-indigo-800 translate-0.5
+                text-white px-12 py-5 text-lg rounded-sm cursor-pointer
               "
             >
               {mutation.isPending ? (

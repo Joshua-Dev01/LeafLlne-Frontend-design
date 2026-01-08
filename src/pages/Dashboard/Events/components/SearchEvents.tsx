@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 
 import { Button } from "../../../../components/ui/button";
 import {
@@ -21,19 +21,46 @@ interface Props {
 
 export const EventSearchBar = ({ onResults, onLoading }: Props) => {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"latest" | "date">("date");
+  const [filterBy, setFilterBy] = useState<"latest" | "name" | "date">(
+    "latest"
+  );
+  const [selectedDate, setSelectedDate] = useState("");
   const [topic, setTopic] = useState("all");
   const [status, setStatus] = useState("all");
   const [openFilters, setOpenFilters] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setOpenFilters(false);
+      }
+    };
+
+    if (openFilters) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openFilters]);
 
   const buildQuery = () => {
     const params = new URLSearchParams({
       search,
-      sort,
+      filterBy,
       page: "1",
       limit: "10",
     });
 
+    if (filterBy === "date" && selectedDate) {
+      params.append("date", selectedDate);
+    }
     if (topic !== "all") params.append("topic", topic);
     if (status !== "all") params.append("status", status);
 
@@ -50,125 +77,188 @@ export const EventSearchBar = ({ onResults, onLoading }: Props) => {
     } finally {
       onLoading(false);
     }
-  }, [search, sort, topic, status]);
+  }, [search, filterBy, selectedDate, topic, status, onLoading, onResults]);
 
   useEffect(() => {
     const timer = setTimeout(fetchEvents, 500);
     return () => clearTimeout(timer);
   }, [fetchEvents]);
 
+  const handleReset = () => {
+    setFilterBy("latest");
+    setSelectedDate("");
+    setTopic("all");
+    setStatus("all");
+  };
+
+  const hasActiveFilters =
+    filterBy !== "latest" ||
+    topic !== "all" ||
+    status !== "all" ||
+    selectedDate !== "";
+
   return (
-    <div className="relative flex flex-col gap-4">
-      {/* TOP BAR */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        {/* SEARCH */}
+    <div className="relative w-full">
+      {/* SEARCH BAR WITH FILTER */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* SEARCH INPUT */}
         <div className="relative flex-1">
           <Search
             size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search events..."
             className="
-              w-full rounded-xl border border-gray-300 bg-white px-12 py-3 dark:bg-transparent
-              shadow-sm text-gray-800 placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-              transition
+              w-full rounded-lg sm:rounded-xl border border-gray-200 bg-white 
+              pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3
+              text-sm sm:text-base text-gray-800 placeholder-gray-400
+              dark:bg-neutral-900 dark:border-neutral-700 dark:text-white
+              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+              transition-all duration-200
+              shadow-sm hover:shadow-md
             "
           />
         </div>
 
-        {/* SORT */}
-        <Select value={sort} onValueChange={(v) => setSort(v as any)}>
-          <SelectTrigger className="w-[160px] rounded-xl border border-gray-300 shadow-sm">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="latest">Latest</SelectItem>
-            <SelectItem value="date">Event Date</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* FILTER DROPDOWN BUTTON */}
-        <div className="relative">
+        {/* FILTER BUTTON */}
+        <div className="relative" ref={filterRef}>
           <Button
             variant="outline"
             onClick={() => setOpenFilters((p) => !p)}
-            className="rounded-xl border border-gray-300 px-4 py-3 flex items-center gap-2 shadow-sm"
+            className={`
+              relative rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 
+              shadow-sm hover:shadow-md transition-all duration-200
+              ${
+                openFilters
+                  ? "bg-indigo-50 border-indigo-300 dark:bg-indigo-950"
+                  : "border-gray-200"
+              }
+              ${hasActiveFilters ? "border-indigo-500" : ""}
+            `}
           >
-            <SlidersHorizontal size={18} />
-
-            <ChevronDown
-              size={16}
-              className={`transition-transform ${
-                openFilters ? "rotate-180" : ""
-              }`}
+            <SlidersHorizontal
+              size={18}
+              className={hasActiveFilters ? "text-indigo-600" : ""}
             />
+            {hasActiveFilters && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-600 rounded-full"></span>
+            )}
           </Button>
 
-          {/* FILTER PANEL */}
+          {/* FILTER DROPDOWN PANEL */}
           {openFilters && (
             <div
               className="
-              absolute right-0 mt-2 w-64 rounded-xl border  bg-white dark:bg-neutral-900
-              shadow-lg p-4 space-y-4 z-50
+              absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 
+              rounded-xl border border-gray-200 bg-white 
+              dark:bg-neutral-900 dark:border-neutral-700
+              shadow-xl p-4 sm:p-5 space-y-4 z-50
             "
             >
-              {/* TOPIC */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-1">
-                    Topic
-                  </label>
-                  <Select value={topic} onValueChange={setTopic}>
-                    <SelectTrigger className="rounded-lg">
-                      <SelectValue placeholder="All topics" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="Technology">Technology</SelectItem>
-                      <SelectItem value="Business">Business</SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* HEADER */}
+              <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-neutral-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  Filters
+                </h3>
+                <button
+                  onClick={() => setOpenFilters(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
 
-                {/* STATUS */}
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-1">
-                    Status
+              {/* FILTER BY */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Filter By
+                </label>
+                <Select
+                  value={filterBy}
+                  onValueChange={(v) => setFilterBy(v as any)}
+                >
+                  <SelectTrigger className="w-full rounded-lg border-gray-200 dark:border-neutral-700">
+                    <SelectValue placeholder="Select filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">Latest</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* DATE INPUT (shown only when "date" is selected) */}
+              {filterBy === "date" && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Select Date
                   </label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="rounded-lg">
-                      <SelectValue placeholder="All statuses" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="upcoming">Upcoming</SelectItem>
-                      <SelectItem value="finished">Finished</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="
+                      w-full rounded-lg border border-gray-200 bg-white px-3 py-2
+                      text-sm text-gray-800 
+                      dark:bg-neutral-800 dark:border-neutral-700 dark:text-white
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                      transition-all
+                    "
+                  />
                 </div>
+              )}
+
+              {/* TOPIC */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Topic
+                </label>
+                <Select value={topic} onValueChange={setTopic}>
+                  <SelectTrigger className="w-full rounded-lg border-gray-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All topics" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Topics</SelectItem>
+                    <SelectItem value="Technology">Technology</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* STATUS */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Status
+                </label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full rounded-lg border-gray-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="finished">Finished</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* ACTIONS */}
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-neutral-700">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setTopic("all");
-                    setStatus("all");
-                  }}
+                  variant="outline"
+                  onClick={handleReset}
+                  className="flex-1 rounded-lg border-gray-200 dark:border-neutral-700"
                 >
                   Reset
                 </Button>
                 <Button
-                  className="!bg-blue-950 !text-white"
-                  size="sm"
                   onClick={() => setOpenFilters(false)}
+                  className="flex-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   Apply
                 </Button>
