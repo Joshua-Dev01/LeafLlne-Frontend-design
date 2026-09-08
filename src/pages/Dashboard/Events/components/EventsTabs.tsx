@@ -1,94 +1,50 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { EventsPage } from "./EventsPage";
 import MyEvents from "./MyEvents";
+import type { Event } from "../types/eventsTypes";
 
-interface Tab {
-  id: string;
-  // short label shown on the tab button
-  label?: ReactNode;
-  // component/content to render when this tab is active
-  component?: ReactNode;
-  count?: number;
+interface Props {
+  searchResults: Event[] | null;
+  searchLoading: boolean;
 }
 
-interface TabsProps {
-  tabs: Tab[];
-  defaultTab?: string;
-  onChange?: (tabId: string) => void;
-}
+const TABS = [
+  { id: "all",  label: "All Events" },
+  { id: "mine", label: "My Events"  },
+];
 
-export function Tabs({ tabs, defaultTab, onChange }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
-
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    onChange?.(tabId);
-  };
-
-  return (
-    <div className="flex font-sans  gap-4 mb-7">
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-
-        return (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={`
-              py-3 px-5 rounded-sm cursor-pointer 
-              ${
-                isActive
-                  ? "!bg-indigo-800 dark:!bg-indigo-900 !text-white shadow-md"
-                  : " text-gray-700 hover:bg-gray-100 shadow-md bg-white dark:bg-transparent border border-white"
-              }
-            `}
-          >
-            <span className="whitespace-nowrap">{tab.label}</span>
-            {tab.count !== undefined && (
-              <span
-                className={`
-                  px-2 py-0.5 rounded-full text-xs font-semibold
-                  ${
-                    isActive
-                      ? "bg-white/20 text-white"
-                      : "bg-gray-200 text-gray-700"
-                  }
-                `}
-              >
-                {tab.count}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// Demo
-export default function EventTabs() {
-  const [activeTab, setActiveTab] = useState("all");
-
-  const tabs: Tab[] = [
-    { id: "all", label: "All Events", component: <EventsPage /> },
-    { id: "upcoming", label: "Upcoming", component: <MyEvents />},
-  ];
+export default function EventTabs({ searchResults, searchLoading }: Props) {
+  const [active, setActive] = useState("all");
 
   return (
     <div>
-      <div>
-        {/* Tab Component */}
-        <Tabs tabs={tabs} defaultTab="all" onChange={setActiveTab} />
+      {/* Tab bar */}
+      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-white/6 rounded-xl w-fit mb-6">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActive(tab.id)}
+            className={`
+              px-5 py-2 rounded-lg text-sm font-bold transition-all duration-200 font-['DM_Sans',sans-serif]
+              ${active === tab.id
+                ? "bg-white dark:bg-[#0F1A2E] text-slate-900 dark:text-white shadow-sm"
+                : "text-slate-500 dark:text-white/40 hover:text-slate-700 dark:hover:text-white/60"
+              }
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Tab contents: prefer rendering the imported component when present */}
-      <div>
-        {tabs.find((t) => t.id === activeTab)?.component ?? (
-          <div>{tabs.find((t) => t.id === activeTab)?.label}</div>
-        )}
-      </div>
+      {/* Content */}
+      {active === "all"  && (
+        <EventsPage
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+        />
+      )}
+      {active === "mine" && <MyEvents />}
     </div>
-
-    
   );
 }

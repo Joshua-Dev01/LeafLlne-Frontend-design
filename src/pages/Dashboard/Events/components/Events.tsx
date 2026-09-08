@@ -1,256 +1,340 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Bell, Check, MoreHorizontal, Users, Calendar } from "lucide-react";
-
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
+  MapPin, Clock, Heart, Users,
+  Share2, MessageCircle, MoreVertical, Pencil, Trash2, Check,
+} from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuTrigger,
+  DropdownMenuContent, DropdownMenuItem,
 } from "../../../../components/ui/dropdown-menu";
-
 import { useToggleInterested, useToggleGoing } from "../hooks/eventHooks";
 import type { Event } from "../types/eventsTypes";
 import DeleteEventModal from "./DeleteEventModal";
-import { Button } from "../../../../components/ui/button";
+
+import { EventComments } from "./Eventcomments ";
+import { ShareEventModal } from "./Shareeventmodal ";
+import { EditEventModal } from "./EditEventModal";
 
 interface Props {
   event: Event;
   currentUserId: string;
 }
 
+/* ── Status config ───────────────────────────────────────────────── */
+const statusConfig = {
+  upcoming: {
+    label: "UPCOMING",
+    bg: "bg-orange-500",
+    cardBg: "bg-orange-500",
+    dot: "bg-white",
+  },
+  ongoing: {
+    label: "LIVE",
+    bg: "bg-green-500",
+    cardBg: "bg-green-600",
+    dot: "bg-white animate-pulse",
+  },
+  ended: {
+    label: "ENDED",
+    bg: "bg-slate-600",
+    cardBg: "bg-[#1a1a2e]",
+    dot: "",
+  },
+};
+
+/* ── Topic color map ─────────────────────────────────────────────── */
+const topicColor: Record<string, string> = {
+  Technology:    "text-blue-600",
+  Business:      "text-purple-600",
+  Design:        "text-pink-600",
+  Science:       "text-teal-600",
+  Arts:          "text-rose-600",
+  Sports:        "text-orange-600",
+  Health:        "text-green-600",
+  Other:         "text-slate-500",
+};
+
 export const EventCard = ({ event, currentUserId }: Props) => {
   const toggleInterested = useToggleInterested();
-  const toggleGoing = useToggleGoing();
+  const toggleGoing      = useToggleGoing();
 
   const [interestedUsers, setInterestedUsers] = useState<string[]>([]);
-  const [goingUsers, setGoingUsers] = useState<string[]>([]);
-  const [isInterested, setIsInterested] = useState(false);
-  const [isNotified, setIsNotified] = useState(false);
-  const [isGoing, setIsGoing] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [goingUsers,      setGoingUsers]      = useState<string[]>([]);
+  const [isInterested,    setIsInterested]    = useState(false);
+  const [isGoing,         setIsGoing]         = useState(false);
+
+  const [deleteOpen,   setDeleteOpen]   = useState(false);
+  const [shareOpen,    setShareOpen]    = useState(false);
+  const [editOpen,     setEditOpen]     = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   useEffect(() => {
-    setInterestedUsers(event.interestedUsers || []);
-    setGoingUsers(event.goingUsers || []);
-    setIsInterested(event.interestedUsers?.includes(currentUserId) || false);
-    setIsGoing(event.goingUsers?.includes(currentUserId) || false);
+    setInterestedUsers(event.interestedUsers ?? []);
+    setGoingUsers(event.goingUsers ?? []);
+    setIsInterested(event.interestedUsers?.includes(currentUserId) ?? false);
+    setIsGoing(event.goingUsers?.includes(currentUserId) ?? false);
   }, [event, currentUserId]);
 
-  /* =======================
-      INTEREST HANDLER
-     ======================= */
-  const handleInterestedClick = () => {
-    // Interest → Notified → Remove
-    if (!isInterested) {
-      setIsInterested(true);
-      setIsNotified(false);
-      setInterestedUsers((prev) => [...prev, currentUserId]);
-      toggleInterested.mutate(event.id);
-      return;
-    }
+  const isOwner = event.createdBy === currentUserId;
 
-    if (isInterested && !isNotified) {
-      setIsNotified(true);
-      return;
-    }
-
-    setIsInterested(false);
-    setIsNotified(false);
-    setInterestedUsers((prev) => prev.filter((id) => id !== currentUserId));
+  const handleInterested = () => {
+    const next = !isInterested;
+    setIsInterested(next);
+    setInterestedUsers((p) =>
+      next ? [...p, currentUserId] : p.filter((id) => id !== currentUserId)
+    );
     toggleInterested.mutate(event.id);
   };
 
-  /* =======================
-      GOING HANDLER
-     ======================= */
-  const handleGoingClick = () => {
-    const prevUsers = [...goingUsers];
+  const handleGoing = () => {
+    const prev = [...goingUsers];
     const prevState = isGoing;
-
-    const updatedUsers = isGoing
-      ? prevUsers.filter((id) => id !== currentUserId)
-      : [...prevUsers, currentUserId];
-
-    setGoingUsers(updatedUsers);
+    setGoingUsers(isGoing
+      ? prev.filter((id) => id !== currentUserId)
+      : [...prev, currentUserId]
+    );
     setIsGoing(!isGoing);
-
     toggleGoing.mutate(event.id, {
-      onError: () => {
-        setGoingUsers(prevUsers);
-        setIsGoing(prevState);
-      },
+      onError: () => { setGoingUsers(prev); setIsGoing(prevState); },
     });
   };
 
-  /* =======================
-      ATTENDANCE %
-     ======================= */
-  const capacity =
-    typeof event.capacity === "number" && event.capacity > 0
-      ? event.capacity
-      : 100;
-  const attendancePercent = Math.min((goingUsers.length / capacity) * 100, 100);
-
-  // Format date more elegantly
+  const status   = statusConfig[event.status ?? "upcoming"];
   const eventDate = new Date(event.date);
-  const monthDay = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const year = eventDate.getFullYear();
-  const time = eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const month    = eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const day      = eventDate.getDate();
+  const time     = eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const topicClr = event.topic ? (topicColor[event.topic] ?? "text-slate-500") : "text-slate-500";
 
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="group relative bg-white dark:bg-zinc-900 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-black/20 border border-gray-200 dark:border-zinc-800 overflow-hidden transition-all duration-300"
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="
+          flex flex-col bg-white dark:bg-[#111827]
+          rounded-xl overflow-hidden
+          border border-slate-200 dark:border-white/8
+          shadow-sm hover:shadow-md dark:hover:shadow-black/20
+          transition-all duration-200
+        "
       >
-        {/* Gradient accent top border */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
-        
-        {/* Header with date badge and menu */}
-        <div className="relative px-6 pt-5 pb-4 border-b border-gray-100 dark:border-zinc-800">
-          <div className="flex items-start justify-between">
-            {/* Date Badge */}
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-center justify-center w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-lg shadow-violet-500/30 text-white">
-                <span className="text-xs font-semibold uppercase">{monthDay.split(' ')[0]}</span>
-                <span className="text-lg font-bold leading-none">{monthDay.split(' ')[1]}</span>
-              </div>
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Event Date</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{year}</span>
-              </div>
-            </div>
 
-            {/* Stats and Menu */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-900/50">
-                <Bell size={14} className="flex-shrink-0" />
-                <span className="text-sm font-semibold">{interestedUsers.length}</span>
-              </div>
+        {/* ── Banner ───────────────────────────────────────────── */}
+        <div className={`relative h-[130px] ${event.image ? "" : status.cardBg}`}>
+          {event.image && (
+            <img
+              src={event.image}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          )}
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-lg border border-emerald-200 dark:border-emerald-900/50">
-                <Users size={14} className="flex-shrink-0" />
-                <span className="text-sm font-semibold">{goingUsers.length}</span>
-              </div>
+          {/* Overlay for image cards */}
+          {event.image && (
+            <div className="absolute inset-0 bg-black/30" />
+          )}
 
+          {/* Status pill — top left */}
+          <div className={`
+            absolute top-3 left-3
+            flex items-center gap-1.5 px-2 py-0.5
+            rounded-full text-[10px] font-bold text-white tracking-wider
+            ${status.bg}
+          `}>
+            {event.status === "ongoing" && (
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            )}
+            {status.label}
+          </div>
+
+          {/* Date badge — top right */}
+          <div className="
+            absolute top-3 right-3
+            flex flex-col items-center justify-center
+            w-10 h-10 rounded-lg
+            bg-black/30 backdrop-blur-sm
+            text-white
+          ">
+            <span className="text-[8px] font-bold uppercase leading-none">{month}</span>
+            <span className="text-base font-black leading-tight">{day}</span>
+          </div>
+
+          {/* Owner menu — bottom right of banner */}
+          {isOwner && (
+            <div className="absolute bottom-2 right-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-                    <MoreHorizontal size={18} className="text-gray-600 dark:text-gray-400" />
+                  <button className="
+                    w-7 h-7 flex items-center justify-center rounded-lg
+                    bg-black/30 backdrop-blur-sm text-white
+                    hover:bg-black/50 transition-colors
+                  ">
+                    <MoreVertical size={13} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-36 rounded-xl border-slate-100 dark:border-white/8 bg-white dark:bg-[#1a2235]"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setEditOpen(true)}
+                    className="flex items-center gap-2 text-sm cursor-pointer font-['DM_Sans',sans-serif]"
+                  >
+                    <Pencil size={12} /> Edit
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setDeleteOpen(true)}
-                    className="text-red-600 dark:text-red-400"
+                    className="flex items-center gap-2 text-sm text-red-500 cursor-pointer focus:text-red-500 font-['DM_Sans',sans-serif]"
                   >
-                    Delete Event
+                    <Trash2 size={12} /> Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Main Content */}
-        <div className="px-6 py-5">
+        {/* ── Body ─────────────────────────────────────────────── */}
+        <div className="flex flex-col flex-1 px-4 pt-3 pb-0">
+
+          {/* Topic */}
+          {event.topic && (
+            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 font-['DM_Sans',sans-serif] ${topicClr}`}>
+              {event.topic}
+            </span>
+          )}
+
           {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight">
+          <h3 className="
+            font-bold text-[17px] text-slate-900 dark:text-white
+            leading-snug mb-1 line-clamp-1
+            font-['DM_Sans',sans-serif]
+          ">
             {event.title}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
+          <p className="
+            text-[12.5px] text-slate-500 dark:text-white/40
+            line-clamp-2 mb-3 leading-relaxed
+            font-['DM_Sans',sans-serif]
+          ">
             {event.description}
           </p>
 
-          {/* Location and Time */}
-          <div className="space-y-2 mb-5">
-            <div className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
-              <div className="flex items-center justify-center w-8 h-8 bg-rose-50 dark:bg-rose-950/30 rounded-lg">
-                <MapPin size={16} className="text-rose-600 dark:text-rose-400" />
-              </div>
-              <span className="text-sm font-medium">{event.location}</span>
-            </div>
-            
-            <div className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                <Calendar size={16} className="text-blue-600 dark:text-blue-400" />
-              </div>
-              <span className="text-sm font-medium">{time}</span>
-            </div>
+          {/* Time */}
+          <div className="flex items-center gap-2 text-slate-500 dark:text-white/40 mb-1.5">
+            <Clock size={13} className="flex-shrink-0" />
+            <span className="text-[12px] font-medium font-['DM_Sans',sans-serif]">{time}</span>
           </div>
 
-          {/* Attendance Progress */}
-          <div className="mb-5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                Attendance
-              </span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
-                {goingUsers.length} / {capacity}
+          {/* Location */}
+          {event.location && (
+            <div className="flex items-center gap-2 text-slate-500 dark:text-white/40 mb-3">
+              <MapPin size={13} className="flex-shrink-0" />
+              <span className="text-[12px] font-medium font-['DM_Sans',sans-serif] truncate">
+                {event.location}
               </span>
             </div>
-            <div className="relative w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${attendancePercent}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="absolute h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"
-              />
+          )}
+
+          {/* Stats */}
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/40 font-['DM_Sans',sans-serif]">
+              <Heart size={12} />
+              <span>{interestedUsers.length} interested</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/40 font-['DM_Sans',sans-serif]">
+              <Users size={12} />
+              <span>{goingUsers.length} going</span>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={handleInterestedClick}
-              className={`h-11 rounded-xl font-semibold transition-all duration-200 ${
-                isNotified
-                  ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30"
-                  : isInterested
-                  ? "bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/30"
-                  : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200"
-              }`}
+          {/* Action buttons */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {/* Interest */}
+            <button
+              onClick={handleInterested}
+              className={`
+                flex items-center justify-center gap-1.5
+                py-2 rounded-lg border text-[12.5px] font-semibold
+                transition-all duration-150 font-['DM_Sans',sans-serif]
+                ${isInterested
+                  ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white text-white dark:text-slate-900"
+                  : "bg-white dark:bg-transparent border-slate-200 dark:border-white/15 text-slate-700 dark:text-white/70 hover:border-slate-300 dark:hover:border-white/30"
+                }
+              `}
             >
-              <div className="flex items-center gap-2">
-                {isNotified ? (
-                  <Bell size={16} className="fill-current" />
-                ) : (
-                  <Check size={16} />
-                )}
-                <span className="text-sm">
-                  {isNotified ? "Notified" : isInterested ? "Interested" : "Interest"}
-                </span>
-              </div>
-            </Button>
+              <Heart size={13} className={isInterested ? "fill-current" : ""} />
+              Interest
+            </button>
 
-            <Button
-              onClick={handleGoingClick}
-              className={`h-11 rounded-xl font-semibold transition-all duration-200 ${
-                isGoing
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200"
-              }`}
+            {/* Attend */}
+            <button
+              onClick={handleGoing}
+              className={`
+                flex items-center justify-center gap-1.5
+                py-2 rounded-lg border text-[12.5px] font-semibold
+                transition-all duration-150 font-['DM_Sans',sans-serif]
+                ${isGoing
+                  ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white text-white dark:text-slate-900"
+                  : "bg-white dark:bg-transparent border-slate-200 dark:border-white/15 text-slate-700 dark:text-white/70 hover:border-slate-300 dark:hover:border-white/30"
+                }
+              `}
             >
-              <div className="flex items-center gap-2">
-                <Users size={16} />
-                <span className="text-sm">{isGoing ? "Going" : "Attend"}</span>
-              </div>
-            </Button>
+              {isGoing && <Check size={13} />}
+              <Users size={13} />
+              Attend
+            </button>
           </div>
+        </div>
+
+        {/* ── Footer ───────────────────────────────────────────── */}
+        <div className="
+          flex items-center justify-between
+          px-4 py-2.5
+          border-t border-slate-100 dark:border-white/6
+          text-slate-400 dark:text-white/30
+        ">
+          <div className="flex items-center gap-0">
+            <button
+              onClick={() => setCommentsOpen(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/6 text-[11.5px] font-medium transition-colors font-['DM_Sans',sans-serif]"
+            >
+              <MessageCircle size={12} />
+              Discuss
+            </button>
+
+            <span className="text-slate-200 dark:text-white/10 mx-0.5">|</span>
+
+            <button
+              onClick={() => setShareOpen(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/6 text-[11.5px] font-medium transition-colors font-['DM_Sans',sans-serif]"
+            >
+              <Share2 size={12} />
+              Share
+            </button>
+          </div>
+
+          <span className="text-[11px] font-medium font-['DM_Sans',sans-serif] truncate max-w-[100px]">
+            by <span className="text-slate-500 dark:text-white/40 font-semibold">{event.creatorName}</span>
+          </span>
         </div>
       </motion.div>
 
-      <DeleteEventModal
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        event={event}
+      {/* Modals */}
+      <DeleteEventModal open={deleteOpen} onClose={() => setDeleteOpen(false)} event={event} />
+      <ShareEventModal  open={shareOpen}  onClose={() => setShareOpen(false)}  event={event} />
+      <EditEventModal   open={editOpen}   onClose={() => setEditOpen(false)}   event={event} />
+      <EventComments
+        eventId={event.id}
+        currentUserId={currentUserId}
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
       />
     </>
   );

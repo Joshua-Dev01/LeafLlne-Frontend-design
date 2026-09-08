@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Allow access to protected routes when the user is logged in (token)
   // or has just verified their email (isVerified set by verify flow).
   // This enables the verify flow to navigate directly to /dashboard.
-  if (!token && !isVerified) {
+  if (!token && !isVerirfied) {
     return <Navigate to="/auth/login" replace />;
   }
 

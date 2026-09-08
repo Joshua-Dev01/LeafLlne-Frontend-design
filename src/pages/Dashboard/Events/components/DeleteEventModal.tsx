@@ -1,9 +1,8 @@
-import { Modal, Button } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, LoaderCircle, X } from "lucide-react";
+import { toast } from "sonner";
 import { deleteEventApi } from "../apis/eventsApi";
 import type { Event } from "../types/eventsTypes";
-import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -11,72 +10,73 @@ interface Props {
   event: Event | null;
 }
 
-const DeleteEventModal: React.FC<Props> = ({ open, onClose, event }) => {
-  const queryClient = useQueryClient();
+const DeleteEventModal = ({ open, onClose, event }: Props) => {
+  const qc = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () => deleteEventApi(event?.id || ""),
+    mutationFn: () => deleteEventApi(event?.id ?? ""),
     onSuccess: () => {
-      toast.success("Event deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast.success("Event deleted");
+      qc.invalidateQueries({ queryKey: ["events"] });
+      qc.invalidateQueries({ queryKey: ["my-events"] });
       onClose();
     },
-    onError: () => {
-      toast.error("Failed to delete event");
-    },
+    onError: () => toast.error("Failed to delete event"),
   });
 
+  if (!open) return null;
+
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      centered
-      destroyOnClose
-      className="!p-0 custom-dark-modal"
-      closeIcon={<span className="text-gray-400 hover:text-white">✕</span>}
-    >
-      <div className=" text-white rounded-2xl p-8 shadow-2xl">
-        {/* Icon */}
-        <div className="flex justify-center mb-6">
-          <ExclamationCircleOutlined
-            style={{
-              fontSize: 56,
-              color: "#f87171",
-              filter: "drop-shadow(0 0 8px rgba(248,113,113,0.8))",
-            }}
-          />
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-center mb-2">Delete event?</h2>
+      {/* Modal */}
+      <div className="relative w-full max-w-sm bg-white dark:bg-[#0F1A2E] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/8 overflow-hidden">
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/8 text-slate-400 dark:text-white/30 transition-colors"
+        >
+          <X size={14} />
+        </button>
 
-        <p className="text-gray-400 text-center mb-6">
-          This action cannot be undone. This will permanently delete{" "}
-          <span className="text-white font-semibold">{event?.title}</span>.
-        </p>
+        <div className="px-6 pt-8 pb-6 text-center">
+          {/* Icon */}
+          <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+            <AlertTriangle size={26} className="text-red-500" />
+          </div>
 
-        {/* Actions */}
-        <div className="flex justify-center gap-4">
-          <Button
-            onClick={onClose}
-            className="!bg-[#4f545c] !text-white hover:!bg-[#5b5f67] px-6 py-2 rounded-lg shadow-md"
-          >
-            Cancel
-          </Button>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 font-['DM_Sans',sans-serif]">
+            Delete Event?
+          </h2>
 
-          <Button
-            danger
-            type="primary"
-            loading={isPending}
-            onClick={() => mutate()}
-            className="!bg-[#d83c3e] hover:!bg-[#a12d2f] px-6 py-2 rounded-lg shadow-md"
-          >
-            Delete
-          </Button>
+          <p className="text-sm text-slate-500 dark:text-white/40 mb-6 font-['DM_Sans',sans-serif]">
+            This will permanently delete{" "}
+            <span className="font-semibold text-slate-700 dark:text-white">
+              {event?.title}
+            </span>
+            . This action cannot be undone.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-white/8 text-slate-600 dark:text-white/60 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-white/4 transition-colors font-['DM_Sans',sans-serif]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => mutate()}
+              disabled={isPending}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors font-['DM_Sans',sans-serif] disabled:opacity-60"
+            >
+              {isPending ? <LoaderCircle size={14} className="animate-spin" /> : "Delete"}
+            </button>
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 };
 

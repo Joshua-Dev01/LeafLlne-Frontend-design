@@ -1,5 +1,5 @@
 // src/pages/Dashboard/components/DashboardLayout.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Outlet } from "react-router-dom";
 import Navbar from "./NavBar";
@@ -9,16 +9,10 @@ import { ThemeProvider } from "../../../context/theme";
 import { Menu } from "lucide-react";
 
 const DashboardLayout = () => {
-  const [userName, setUserName] = useState("User");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("leafline_user") || "{}");
-    setUserName(user?.name || "User");
-  }, []);
-
   return (
-    <div className="h-screen flex overflow-hidden font-sans bg-blue-50  dark:bg-[#000000] ">
+    <div className="h-screen flex overflow-hidden font-sans bg-app-bg dark:bg-[#000000] ">
       {/* Sidebar for Desktop */}
       <div className="hidden md:block ">
         <LeaflineSidebar />
@@ -57,7 +51,7 @@ const DashboardLayout = () => {
           >
             <Menu className="text-black cursor-pointer dark:text-white   w-6 h-6" />
           </button>
-          <Navbar userName={userName} />
+          <Navbar />
         </div>
 
         {/* Routed Page Content */}

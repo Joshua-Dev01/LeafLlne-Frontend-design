@@ -124,7 +124,7 @@ const SubjectsList = () => {
 
                     <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 text-sm dark:text-gray-200 hover:bg-blue-600 dark:hover:bg-white dark:hover:text-black hover:text-white cursor-pointer transition">
                       <Link
-                        to={`/viewNotes/${subject._id}`}
+                        to={`/dashboard/notes/viewNotes/${subject._id}`}
                         className="flex gap-2 items-center"
                       >
                         <RiTableView className="text-blue-400" /> View Notes

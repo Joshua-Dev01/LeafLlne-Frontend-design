@@ -1,23 +1,20 @@
-// src/features/notes/pages/ViewNotePage.tsx
+// src/pages/Dashboard/Notes/NotesFiles/pages/ViewNotePage.tsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteNote, getNoteById } from "../api/notesFlies.api";
 import { handleResponse } from "../../../../../utils/handleErrors";
 import { Skeleton } from "../../../../../components/ui/skeleton";
 import { formatBytes } from "../utilities/formatBytes";
-
-import { MoreVertical, Edit, Trash2, Download, Eye } from "lucide-react";
+import { MoreVertical, Edit, Trash2, Download, Eye, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import classNames from "classnames";
 import { EmptyState } from "../../../../../components/Empty/EmptyState";
-import EditNoteModal from "./Editnotemodal";
 
 export default function ViewNotePage() {
-  const { noteId } = useParams<{ noteId: string }>();
+  const { subjectId, noteId } = useParams<{ subjectId: string; noteId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showMenu, setShowMenu] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["note", noteId],
@@ -30,23 +27,21 @@ export default function ViewNotePage() {
     onSuccess: () => {
       handleResponse({ successCondition: true, successMsg: "Deleted" });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      navigate(-1);
+      navigate(`/dashboard/notes/viewNotes/${subjectId}`);
     },
     onError: (err) => handleResponse({ error: err }),
   });
 
-  if (isLoading) {
-    return <Skeleton className="h-80 w-full rounded-xl" />;
-  }
+  if (isLoading) return <Skeleton className="h-80 w-full rounded-xl" />;
 
-  const note: any = data?.note;
+  const note = data?.note;
   if (!note) return <div className="text-center"><EmptyState /></div>;
 
   const previewArea = () => {
     const mime = note.fileMimeType?.toLowerCase() || "";
 
     if (!note.fileUrl) {
-      return <div className="text-center py-20">No preview available</div>;
+      return <div className="text-center py-20 text-muted-foreground">No preview available</div>;
     }
 
     if (mime.includes("pdf")) {
@@ -69,16 +64,14 @@ export default function ViewNotePage() {
     }
 
     return (
-      <div className="py-20 flex flex-col items-center">
-        <p className="mb-3 text-sm text-muted-foreground">
-          Preview not available
-        </p>
-        <a
+      <div className="py-20 flex flex-col items-center gap-3">
+        <p className="text-sm text-muted-foreground">Preview not available for this file type</p>
+        <a 
           href={note.fileUrl}
           download={note.title}
           target="_blank"
           rel="noreferrer"
-          className="underline text-blue-500"
+          className="underline text-amber-500"
         >
           Download File
         </a>
@@ -86,63 +79,66 @@ export default function ViewNotePage() {
     );
   };
 
-  const downloadFile = () => {
-    const link = document.createElement("a");
-    link.href = note.fileUrl;
-    link.download = note.title;
-    link.click();
-  };
-
   return (
     <div className="space-y-8">
-      {/* Header Section */}
+      {/* ── Header ───────────────────────────────────────────── */}
       <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-2xl font-bold">{note.title}</h1>
-          <p className="text-sm text-muted-foreground">{note.description}</p>
+        <div className="flex items-start gap-3">
+          {/* Back to notes list */}
+          <button
+            onClick={() => navigate(`/dashboard/notes/viewNotes/${subjectId}`)}
+            className="p-2 rounded-md hover:bg-white/10 transition mt-1"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
 
-          <p className="text-xs mt-2 text-muted-foreground">
-            {formatBytes(note.fileSize)} •{" "}
-            {new Date(note.createdAt).toLocaleString()}
-          </p>
+          <div>
+            <h1 className="text-2xl font-bold font-['Georgia',_serif] text-[#0D1F3C] dark:text-white">
+              {note.title}
+            </h1>
+            {note.description && (
+              <p className="text-sm text-muted-foreground mt-1">{note.description}</p>
+            )}
+            <p className="text-xs mt-2 text-muted-foreground">
+              {formatBytes(note.fileSize)} • {new Date(note.createdAt).toLocaleString()}
+            </p>
+          </div>
         </div>
 
-        {/* ACTION MENU */}
+        {/* ── Action menu ──────────────────────────────────────── */}
         <div className="relative">
           <button
-            className="p-2 rounded-full hover:bg-white/10"
+            className="p-2 rounded-full hover:bg-white/10 transition"
             onClick={() => setShowMenu((prev) => !prev)}
           >
             <MoreVertical />
           </button>
 
           {showMenu && (
-            <div
-              className={classNames(
-                "absolute right-0 mt-2 p-2 w-32 rounded-xl",
-                "bg-white/10 backdrop-blur-xl shadow-md z-10 space-y-1"
-              )}
-            >
-              <button
+            <div className={classNames(
+              "absolute right-0 mt-2 p-2 w-36 rounded-xl z-10 space-y-1",
+              "bg-white/10 backdrop-blur-xl shadow-md"
+            )}>
+              <a  
+                href={note.fileUrl}
+                download={note.title}
                 className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => downloadFile()}
               >
                 <Download size={16} /> Download
-              </button>
+              </a>
 
-              <button
+              <a 
+                href={note.fileUrl}
+                target="_blank"
+                rel="noreferrer"
                 className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => navigate(note.fileUrl)}
               >
                 <Eye size={16} /> View Raw
-              </button>
+              </a>
 
               <button
                 className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => {
-                  setEditOpen(true);
-                  setShowMenu(false);
-                }}
+                onClick={() => navigate(`/dashboard/notes/viewNotes/${subjectId}/${noteId}/edit`)}
               >
                 <Edit size={16} /> Edit
               </button>
@@ -150,9 +146,7 @@ export default function ViewNotePage() {
               <button
                 className="flex items-center gap-2 w-full text-sm text-red-400 hover:bg-red-500/20 px-2 py-1 rounded-md"
                 onClick={() => {
-                  if (confirm("Delete this file?")) {
-                    delMutation.mutate(note._id);
-                  }
+                  if (confirm("Delete this note?")) delMutation.mutate(note._id);
                 }}
               >
                 <Trash2 size={16} /> Delete
@@ -162,12 +156,10 @@ export default function ViewNotePage() {
         </div>
       </div>
 
-      {/* File Preview */}
+      {/* ── File preview ─────────────────────────────────────── */}
       <div className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm">
         {previewArea()}
       </div>
-
-      <EditNoteModal note={note} open={editOpen} onClose={() => setEditOpen(false)} />
     </div>
   );
 }

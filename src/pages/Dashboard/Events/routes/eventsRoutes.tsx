@@ -1,5 +1,5 @@
 import { CreateEventForm } from "../components/AddEvents";
-import { EventWrapper } from "../components/EventWrapper";
+import { EventsWrapper } from "../components/EventWrapper";
 
 
 const EventsRouter = [
@@ -8,7 +8,7 @@ const EventsRouter = [
     children: [
       {
         index: true,
-        element: <EventWrapper />,
+        element: <EventsWrapper />,
       },
       {
         path: "create-event",

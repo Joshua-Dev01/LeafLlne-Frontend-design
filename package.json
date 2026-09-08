@@ -54,6 +54,7 @@
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
     "framer-motion": "^12.19.2",
@@ -84,6 +85,7 @@
     "swiper": "^11.2.10",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
+    "three": "^0.162.0",
     "zod": "^3.25.67",
     "zustand": "^5.0.5"
   },
@@ -97,6 +99,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/recharts": "^1.8.29",
+    "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^4.5.2",
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",

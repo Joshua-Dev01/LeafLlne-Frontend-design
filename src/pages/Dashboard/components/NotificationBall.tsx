@@ -29,18 +29,13 @@ const NotificationBall = () => {
   }, []);
 
   return (
-    <div className="flex items-center gap-7">
-      {/* ... other navbar items ... */}
-
-      {/* Notifications */}
-      <Link to={"notifications"}>
-        <Badge count={notifications.length} size="small">
-          <Bell className="text-[24px] dark:!text-gray-700 bg-white p-1 shadow-2xl rounded-full !text-black cursor-pointer" />
-        </Badge>
-      </Link>
-
-      {/* ... avatar dropdown ... */}
-    </div>
+    <Link to={"notifications"}>
+      <Badge dot={notifications.length > 0} color="#7C3AED" offset={[-4, 4]}>
+        <div className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-violet-50 hover:text-[#2E1065] dark:text-gray-400 dark:hover:bg-[#1b1b1b] transition cursor-pointer">
+          <Bell className="w-5 h-5" />
+        </div>
+      </Badge>
+    </Link>
   );
 };
 export default NotificationBall;

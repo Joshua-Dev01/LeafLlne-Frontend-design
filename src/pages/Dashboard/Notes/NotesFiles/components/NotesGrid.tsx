@@ -1,14 +1,13 @@
 // src/features/notes/components/NotesGrid.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 
 import NoteCard from "./NoteCard";
-import type { NotesListResponse, Note } from "../interface/notes";
+import type { NotesListResponse } from "../interface/notes";
 import { getNotesBySubject, deleteNote } from "../api/notesFlies.api";
 import { handleResponse } from "../../../../../utils/handleErrors";
-import { Skeleton } from "../../../../../components/ui/skeleton";
+import NoteCardSkeleton from "./Notecardskeleton";
 
 type Props = {
   subjectId: string;
@@ -16,14 +15,14 @@ type Props = {
 
 export default function NotesGrid({ subjectId }: Props) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery<NotesListResponse>({
     queryKey: ["notes", subjectId, search, page],
     queryFn: () => getNotesBySubject(subjectId, { search, page, limit: 12 }),
-    placeholderData: (prev) => prev, // ✅ REPLACES keepPreviousData
+    placeholderData: (prev) => prev,
   });
 
   const delMutation = useMutation({
@@ -35,22 +34,10 @@ export default function NotesGrid({ subjectId }: Props) {
     onError: (err) => handleResponse({ error: err }),
   });
 
-  const onView = (id: string) => navigate(`/notes/${id}`);
-  const onEdit = (note: Note) => navigate(`/notes/${note._id}/edit`);
   const onDelete = (id: string) => {
-    if (!confirm("Delete this file?")) return;
+    if (!confirm("Delete this note?")) return;
     delMutation.mutate(id);
   };
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {[...Array(8)].map((_, i) => (
-          <Skeleton key={i} className="h-36 rounded-xl" />
-        ))}
-      </div>
-    );
-  }
 
   if (isError) {
     return <div className="text-red-500">Failed to load notes</div>;
@@ -61,10 +48,8 @@ export default function NotesGrid({ subjectId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-semibold">Documents</h2>
-          <p className="text-sm text-muted-foreground">
-            Your subject uploaded files
-          </p>
+          <h2 className="text-xl font-semibold text-neutral-900">Notes</h2>
+          <p className="text-sm text-neutral-500">Everything saved to this subject</p>
         </div>
 
         <input
@@ -73,49 +58,57 @@ export default function NotesGrid({ subjectId }: Props) {
             setSearch(e.target.value);
             setPage(1);
           }}
-          placeholder="Search files..."
-          className="px-3 py-2 rounded-md bg-white/5 text-sm w-48"
+          placeholder="Search notes…"
+          className="px-3 py-2 rounded-full border border-neutral-200 bg-neutral-50 text-sm w-48 outline-none focus:border-violet-200"
         />
       </div>
 
       {/* Grid */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-      >
-        {data?.notes?.length ? (
-          data.notes.map((note) => (
-            <NoteCard
-              key={note._id}
-              note={note}
-              onView={onView}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))
-        ) : (
-          <div className="col-span-full text-center text-muted-foreground py-10">
-            No files yet — upload your first note 👍
-          </div>
-        )}
-      </motion.div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <NoteCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {data?.notes?.length ? (
+            data.notes.map((note) => (
+              <NoteCard
+                key={note._id}
+                note={note}
+                menuOpen={openMenuId === note._id}
+                onToggleMenu={() => setOpenMenuId(openMenuId === note._id ? null : note._id)}
+                onDelete={() => {
+                  onDelete(note._id);
+                  setOpenMenuId(null);
+                }}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center text-neutral-400 py-10">
+              No notes yet — add your first one 👍
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {/* Pagination */}
       <div className="flex items-center justify-center mt-6 gap-3">
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-1 rounded-md bg-white/5"
+          className="px-3 py-1 rounded-md border border-neutral-200 text-sm text-neutral-600 disabled:opacity-40"
         >
           Prev
         </button>
 
-        <span className="text-sm text-muted-foreground">{page}</span>
+        <span className="text-sm text-neutral-400">{page}</span>
 
         <button
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= (data?.totalPages ?? 1)}
-          className="px-3 py-1 rounded-md bg-white/5"
+          className="px-3 py-1 rounded-md border border-neutral-200 text-sm text-neutral-600 disabled:opacity-40"
         >
           Next
         </button>

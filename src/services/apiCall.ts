@@ -27,6 +27,11 @@ export const apiPut = async <T, D>(url: string, data: D): Promise<T> => {
   return res.data;
 };
 
+export const apiPatch = async <T, D>(url: string, data: D): Promise<T> => {
+  const res = await axiosInstance.patch<T>(url, data);
+  return res.data;
+};
+
 export const apiDelete = async <T>(url: string): Promise<T> => {
   const res = await axiosInstance.delete<T>(url);
   return res.data;

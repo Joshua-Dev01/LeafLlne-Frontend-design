@@ -7,19 +7,30 @@ import {
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
-const SearchBar = () => {
-  const [open, setOpen] = useState(false);
+interface SearchBarProps {
+  /** Controlled open state. If omitted, the component manages its own state. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Hide the built-in search icon trigger, e.g. when a parent renders its own trigger. */
+  hideTrigger?: boolean;
+}
+
+const SearchBar = ({ open, onOpenChange, hideTrigger = false }: SearchBarProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <>
-      {/* Search Icon (trigger) */}
-      <div className="cursor-pointer" onClick={() => setOpen(true)}>
-        <SearchOutlined className="!text-xl dark:!text-gray-300 !text-black" />
-      </div>
+      {!hideTrigger && (
+        <div className="cursor-pointer" onClick={() => setOpen(true)}>
+          <SearchOutlined className="!text-xl dark:!text-gray-300 !text-black" />
+        </div>
+      )}
 
       {/* Search Modal */}
       <Modal
-        open={open}
+        open={isOpen}
         onCancel={() => setOpen(false)}
         footer={null}
         closable={false}
@@ -35,7 +46,7 @@ const SearchBar = () => {
         >
           {/* Search Input */}
           <Input
-            placeholder="Search your for work ."
+            placeholder="Search notes, projects, or events…"
             prefix={<SearchOutlined className="!text-gray-400 text-lg" />}
             className="!w-full !h-12 !rounded-xl !bg-blue-100 dark:!bg-[#2a2a2a]/70 !text-white placeholder:!text-gray-400 
                        focus:!ring-2 focus:!ring-blue-500 focus:!border-none transition-all"

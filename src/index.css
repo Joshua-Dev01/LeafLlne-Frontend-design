@@ -13,6 +13,17 @@
 @theme {
   --color-primary-white: #f9fafb;
   --color-primary-dark: #101012;
+
+  /* Leafline brand — sampled directly from the reference dashboard design */
+  --color-app-bg: #f8f9fa;
+  --color-violet-50: #faf5ff;
+  --color-violet-100: #f0dbff;   /* sidebar active pill */
+  --color-violet-200: #e0c2fb;
+  --color-violet-500: #7c3aed;
+  --color-violet-600: #5d1a8e;   /* banner gradient — lighter end */
+  --color-violet-700: #4b0082;   /* banner gradient — indigo base */
+  --color-violet-900: #2e0052;   /* buttons, progress bars, FAB, links */
+  --color-violet-950: #1e0638;
 }
 
 /* index.css or App.css */

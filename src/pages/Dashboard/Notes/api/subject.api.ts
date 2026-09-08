@@ -6,6 +6,10 @@ export const getSubjects = async (): Promise<Subject[]> => {
   return await apiGet<Subject[]>("/subjects");
 };
 
+export const getSubjectById = async (id: string): Promise<Subject> => {
+  return await apiGet<Subject>(`/subjects/${id}`);
+};
+
 // add subject
 export const addSubjectApi = async (
   data: CreateSubjectPayload
