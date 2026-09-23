@@ -39,41 +39,41 @@ export default function NoteCard({ note, menuOpen, onToggleMenu, onDelete }: Pro
   const preview = note.description || (note.content ? excerpt(note.content) : "No content yet.");
 
   return (
-    <div className="relative rounded-xl border border-neutral-200 bg-white p-5 hover:shadow-md transition">
+    <div className="relative rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] p-5 hover:shadow-md transition">
       <div className="flex items-center justify-between mb-3">
-        <span className="w-9 h-9 rounded-lg bg-violet-100 text-[#4b0082] flex items-center justify-center">
+        <span className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] flex items-center justify-center">
           {fileIcon(note.fileType)}
         </span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-neutral-400">{relativeTime(note.updatedAt)}</span>
-          <button onClick={onToggleMenu} className="text-neutral-400 hover:text-neutral-700">
+          <button onClick={onToggleMenu} className="text-neutral-400 dark:hover:text-neutral-200 hover:text-neutral-700">
             <MoreVertical className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {menuOpen && (
-        <div className="absolute right-4 top-12 bg-white border border-neutral-200 rounded-lg shadow-lg text-sm z-10 overflow-hidden">
-          <Link to={`/dashboard/notes/note/${note._id}`} className="block px-4 py-2 hover:bg-neutral-50">
+        <div className="absolute right-4 top-12 bg-white dark:bg-[#262525] border border-neutral-200 dark:border-[#2e2b30] rounded-lg shadow-lg text-sm z-10 overflow-hidden">
+          <Link to={`/dashboard/notes/note/${note._id}`} className="block px-4 py-2 text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-[#333]">
             Open
           </Link>
-          <button onClick={onDelete} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">
+          <button onClick={onDelete} className="block w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40">
             Delete
           </button>
         </div>
       )}
 
       <Link to={`/dashboard/notes/note/${note._id}`}>
-        <h3 className="font-semibold text-neutral-900">{note.title}</h3>
-        <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{preview}</p>
+        <h3 className="font-semibold text-neutral-900 dark:text-white">{note.title}</h3>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">{preview}</p>
       </Link>
 
       <div className="flex flex-wrap gap-1.5 mt-3">
         {subjectCode && (
-          <span className="text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded">{subjectCode}</span>
+          <span className="text-xs bg-neutral-100 dark:bg-[#262525] text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded">{subjectCode}</span>
         )}
         {(note.tags ?? []).slice(0, 2).map((tag) => (
-          <span key={tag} className="text-xs bg-violet-50 text-[#4b0082] px-2 py-1 rounded">
+          <span key={tag} className="text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-2 py-1 rounded">
             #{tag}
           </span>
         ))}

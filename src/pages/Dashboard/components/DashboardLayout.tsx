@@ -5,7 +5,6 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./NavBar";
 import LeaflineSidebar from "./SideBar";
 // import { RiMenu2Line } from "react-icons/ri";
-import { ThemeProvider } from "../../../context/theme";
 import { Menu } from "lucide-react";
 
 const DashboardLayout = () => {
@@ -56,9 +55,7 @@ const DashboardLayout = () => {
 
         {/* Routed Page Content */}
         <main className="py-4 px-10 flex-1  overflow-auto">
-          <ThemeProvider>
-            <Outlet />
-          </ThemeProvider>
+          <Outlet />
         </main>
       </div>
     </div>

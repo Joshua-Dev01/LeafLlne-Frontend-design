@@ -19,7 +19,7 @@ const DashboardRoutes = [
     children: [
       {
         index: true, // /dashboard
-        element: <DashboardMainHome userName="User" />,
+        element: <DashboardMainHome />,
       },
       {
         path: "notifications", // /dashboard/projects

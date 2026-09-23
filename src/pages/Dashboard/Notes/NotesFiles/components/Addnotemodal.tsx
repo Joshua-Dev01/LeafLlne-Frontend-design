@@ -10,6 +10,7 @@ import { getSubjects } from "../../api/subject.api";
 import { handleResponse } from "../../../../../utils/handleErrors";
 import { Input } from "../../../../../components/ui/input";
 import AddButton from "../../../../../components/Button/Button";
+import { useTheme } from "../../../../../context/theme";
 
 interface AddNoteModalProps {
   /** Pre-selected subject (used from a subject's own notes page). If omitted,
@@ -18,6 +19,8 @@ interface AddNoteModalProps {
 }
 
 const AddNoteModal = ({ subjectId: fixedSubjectId }: AddNoteModalProps) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -81,6 +84,7 @@ const AddNoteModal = ({ subjectId: fixedSubjectId }: AddNoteModalProps) => {
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
+        styles={{ content: { backgroundColor: isDark ? "#1c1b1b" : "#fff" } }}
         closeIcon={
           <span className="text-black dark:text-gray-200 text-lg">
             <RiCloseLine className="!text-black dark:!text-gray-200 text-lg" />
@@ -95,7 +99,7 @@ const AddNoteModal = ({ subjectId: fixedSubjectId }: AddNoteModalProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!fixedSubjectId && (
             <div>
-              <label className="text-gray-500 font-medium text-sm block mb-1">Course</label>
+              <label className="text-gray-500 dark:text-gray-400 font-medium text-sm block mb-1">Course</label>
               <Select
                 className="w-full"
                 loading={subjectsLoading}
@@ -108,30 +112,30 @@ const AddNoteModal = ({ subjectId: fixedSubjectId }: AddNoteModalProps) => {
           )}
 
           <div>
-            <label className="text-gray-500 font-medium text-sm block mb-1">Title</label>
+            <label className="text-gray-500 dark:text-gray-400 font-medium text-sm block mb-1">Title</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Chapter 3 — Cell Structure"
-              className="shadow-lg bg-gray-100 border border-white/20 !text-black rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 transition"
+              className="shadow-lg bg-gray-100 dark:!bg-[#262525] border border-white/20 dark:border-[#3a3740] !text-black dark:!text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 transition"
             />
           </div>
 
           <div>
-            <label className="text-gray-500 font-medium text-sm block mb-1">Description</label>
+            <label className="text-gray-500 dark:text-gray-400 font-medium text-sm block mb-1">Description</label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional short summary"
-              className="shadow-lg bg-gray-100 border border-white/20 !text-black rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 transition"
+              className="shadow-lg bg-gray-100 dark:!bg-[#262525] border border-white/20 dark:border-[#3a3740] !text-black dark:!text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 transition"
             />
           </div>
 
           <div>
-            <label className="text-gray-500 font-medium text-sm block mb-1">File (optional)</label>
+            <label className="text-gray-500 dark:text-gray-400 font-medium text-sm block mb-1">File (optional)</label>
             <label
               htmlFor="note-file"
-              className="flex items-center gap-2 justify-center border-2 border-dashed border-gray-300 rounded-xl py-6 cursor-pointer text-gray-500 hover:border-blue-400 transition"
+              className="flex items-center gap-2 justify-center border-2 border-dashed border-gray-300 dark:border-[#3a3740] rounded-xl py-6 cursor-pointer text-gray-500 dark:text-gray-400 hover:border-blue-400 transition"
             >
               <UploadCloud className="w-5 h-5" />
               <span className="text-sm">{file ? file.name : "PDF, image, or document"}</span>

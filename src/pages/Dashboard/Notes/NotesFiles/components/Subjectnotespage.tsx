@@ -15,7 +15,7 @@ export default function SubjectNotesPage() {
       <div className="flex items-center justify-between">
         <Link
           to="/dashboard/notes"
-          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800"
+          className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" /> Back to subjects
         </Link>

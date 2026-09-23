@@ -50,20 +50,20 @@ export default function AllNotesPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#2e0052]">Study Notes</h1>
-          <p className="text-neutral-500 text-sm mt-1">
+          <h1 className="text-3xl font-bold text-[#2e0052] dark:text-white">Study Notes</h1>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">
             Manage your academic insights and research materials.
           </p>
           <div className="flex gap-2 mt-3 items-center">
-            <span className="text-xs bg-violet-50 text-[#4b0082] px-3 py-1 rounded-full font-medium">
+            <span className="text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-3 py-1 rounded-full font-medium">
               {subjects?.length ?? 0} Courses
             </span>
-            <span className="text-xs bg-violet-50 text-[#4b0082] px-3 py-1 rounded-full font-medium">
+            <span className="text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-3 py-1 rounded-full font-medium">
               {totalUnits} Total Units
             </span>
             <Link
               to="/dashboard/notes/subjects"
-              className="text-xs text-neutral-400 hover:text-[#4b0082] underline underline-offset-2 ml-1"
+              className="text-xs text-neutral-400 hover:text-[#4b0082] dark:hover:text-[#9d4edd] underline underline-offset-2 ml-1"
             >
               Manage courses
             </Link>
@@ -73,8 +73,7 @@ export default function AllNotesPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate("/dashboard/notes/new")}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg text-white font-medium"
-            style={{ background: "#2e0052" }}
+            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg text-white dark:text-[#201f1f] font-medium bg-[#2e0052] dark:bg-[#e0b6ff] hover:bg-[#3d0069] dark:hover:bg-[#eccbff] transition"
           >
             <Plus className="w-4 h-4" /> New Note
           </button>
@@ -92,7 +91,7 @@ export default function AllNotesPage() {
               setPage(1);
             }}
             placeholder="Search your notes…"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-full border border-neutral-200 bg-neutral-50 outline-none focus:border-violet-200"
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-full border border-neutral-200 dark:border-[#2e2b30] bg-neutral-50 dark:bg-[#1c1b1b] text-neutral-900 dark:text-white outline-none focus:border-violet-200"
           />
         </div>
       </div>
@@ -126,7 +125,7 @@ export default function AllNotesPage() {
           ))}
         </div>
       ) : notes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-neutral-200 p-14 flex flex-col items-center text-center text-neutral-400 gap-3">
+        <div className="rounded-xl border border-dashed border-neutral-200 dark:border-[#3a3740] p-14 flex flex-col items-center text-center text-neutral-400 gap-3">
           <UploadCloud className="w-6 h-6" />
           <p className="text-sm">
             {subjectFilter || search
@@ -156,7 +155,7 @@ export default function AllNotesPage() {
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={isFetching}
-            className="text-sm px-5 py-2 rounded-full border border-neutral-200 text-neutral-600 hover:border-violet-200 hover:text-[#4b0082] transition disabled:opacity-50"
+            className="text-sm px-5 py-2 rounded-full border border-neutral-200 dark:border-[#2e2b30] text-neutral-600 dark:text-neutral-300 hover:border-violet-200 dark:hover:border-[#9d4edd] hover:text-[#4b0082] dark:hover:text-[#9d4edd] transition disabled:opacity-50"
           >
             {isFetching ? "Loading…" : "Load More Notes"}
           </button>
@@ -178,9 +177,10 @@ const FilterPill = ({
   <button
     onClick={onClick}
     className={`text-sm px-4 py-1.5 rounded-full font-medium transition ${
-      active ? "text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+      active
+        ? "bg-[#2e0052] dark:bg-[#e0b6ff] text-white dark:text-[#201f1f]"
+        : "bg-neutral-100 dark:bg-[#1c1b1b] text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#262525]"
     }`}
-    style={active ? { background: "#2e0052" } : undefined}
   >
     {label}
   </button>

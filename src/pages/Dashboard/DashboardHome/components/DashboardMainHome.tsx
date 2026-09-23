@@ -84,7 +84,7 @@ export default function DashboardMainHome() {
   return (
     <div className="w-full space-y-6">
       {/* ===== Welcome banner ===== */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#4b0082] to-[#5d1a8e] text-white p-8">
+      <div className="rounded-2xl bg-gradient-to-br from-[#4b0082] to-[#5d1a8e] dark:bg-[#9d4edd] dark:bg-none text-white p-8">
         <h1 className="text-3xl font-semibold">Welcome back, {user.name.split(" ")[0]}!</h1>
         <p className="mt-2 text-violet-100 max-w-xl text-sm">
           You have {upcomingEvents.length} upcoming event{upcomingEvents.length === 1 ? "" : "s"} and{" "}
@@ -105,7 +105,7 @@ export default function DashboardMainHome() {
           <section>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Notes</h2>
-              <Link to="/dashboard/notes" className="text-sm text-[#7e06da] hover:underline">
+              <Link to="/dashboard/notes" className="text-sm text-[#7e06da] dark:text-[#9d4edd] hover:underline">
                 View Library
               </Link>
             </div>
@@ -126,23 +126,23 @@ export default function DashboardMainHome() {
                   <Link
                     key={subject._id}
                     to={`/dashboard/notes/viewNotes/${subject._id}`}
-                    className="rounded-xl border border-neutral-200 bg-white p-5 hover:shadow-md transition"
+                    className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] p-5 hover:shadow-md transition"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="w-9 h-9 rounded-lg bg-violet-100 text-[#4b0082] flex items-center justify-center">
+                      <span className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] flex items-center justify-center">
                         <NotepadText className="w-[18px] h-[18px]" />
                       </span>
                       <span className="text-xs text-neutral-400">
                         {relativeTime(note?.updatedAt ?? subject.updatedAt)}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-neutral-900">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white">
                       {note?.title ?? subject.name}
                     </h3>
-                    <p className="text-sm text-neutral-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
                       {note?.description ?? `No notes added to ${subject.name} yet.`}
                     </p>
-                    <span className="inline-block mt-3 text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded">
+                    <span className="inline-block mt-3 text-xs bg-neutral-100 dark:bg-[#262525] text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded">
                       {subject.code}
                     </span>
                   </Link>
@@ -162,28 +162,28 @@ export default function DashboardMainHome() {
                 message="Nothing on the calendar yet."
               />
             ) : (
-              <div className="rounded-xl border border-neutral-200 bg-white divide-y divide-neutral-100">
+              <div className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] divide-y divide-neutral-100 dark:divide-[#2e2b30]">
                 {upcomingEvents.map((event) => {
                   const date = new Date(event.date);
                   return (
                     <div key={event.id} className="flex items-center gap-4 p-4">
                       <div className="text-center w-12 shrink-0">
-                        <p className="text-[10px] font-medium text-[#4b0082] uppercase">
+                        <p className="text-[10px] font-medium text-[#4b0082] dark:text-[#9d4edd] uppercase">
                           {date.toLocaleDateString(undefined, { month: "short" })}
                         </p>
-                        <p className="text-lg font-semibold text-neutral-900 leading-none">
+                        <p className="text-lg font-semibold text-neutral-900 dark:text-white leading-none">
                           {date.getDate()}
                         </p>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-neutral-900 truncate">{event.title}</p>
+                        <p className="font-medium text-neutral-900 dark:text-white truncate">{event.title}</p>
                         <p className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3" /> {event.location}
                         </p>
                       </div>
                       <Link
                         to="/dashboard/events"
-                        className="text-sm px-4 py-1.5 rounded-full bg-[#2e0052] text-white hover:bg-[#3d0069] transition shrink-0"
+                        className="text-sm px-4 py-1.5 rounded-full bg-[#2e0052] dark:bg-[#e0b6ff] text-white dark:text-[#201f1f] hover:bg-[#3d0069] dark:hover:bg-[#eccbff] transition shrink-0"
                       >
                         Details
                       </Link>
@@ -198,8 +198,8 @@ export default function DashboardMainHome() {
         {/* ===== Right column ===== */}
         <div className="space-y-6">
           {/* Project Progress */}
-          <section className="rounded-xl border border-neutral-200 bg-[#4b0082] p-5">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4">Project Progress</h2>
+          <section className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] p-5">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Project Progress</h2>
 
             {projectsLoading ? (
               <Skeleton className="h-32 rounded-xl" />
@@ -214,12 +214,12 @@ export default function DashboardMainHome() {
                   return (
                     <div key={project._id}>
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="font-medium text-neutral-800 truncate">{project.title}</span>
+                        <span className="font-medium text-neutral-800 dark:text-neutral-200 truncate">{project.title}</span>
                         <span className="text-neutral-400">{pct}%</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-neutral-100">
+                      <div className="h-1.5 rounded-full bg-neutral-100 dark:bg-[#201f1f]">
                         <div
-                          className="h-1.5 rounded-full bg-[#2e0052]"
+                          className="h-1.5 rounded-full bg-[#2e0052] dark:bg-[#9d4edd]"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -231,15 +231,15 @@ export default function DashboardMainHome() {
 
             <Link
               to="/dashboard/projects"
-              className="block text-center text-sm border border-dashed border-neutral-300 rounded-lg py-2 text-neutral-500 hover:border-violet-200 hover:text-[#4b0082] transition"
+              className="block text-center text-sm border border-dashed border-neutral-300 dark:border-[#3a3740] rounded-lg py-2 text-neutral-500 dark:text-neutral-400 hover:border-violet-200 dark:hover:border-[#9d4edd] hover:text-[#4b0082] dark:hover:text-[#9d4edd] transition"
             >
               + New Project
             </Link>
           </section>
 
           {/* Community Pulse — no backend endpoint yet, honest empty state */}
-          <section className="rounded-xl border border-neutral-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4">Community Pulse</h2>
+          <section className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] p-5">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Community Pulse</h2>
             <EmptyCard
               icon={<Users className="w-5 h-5" />}
               message="Community activity is coming soon."
@@ -261,7 +261,7 @@ const StatChip = ({ label, value, suffix }: { label: string; value: number; suff
 );
 
 const EmptyCard = ({ icon, message }: { icon: React.ReactNode; message: string }) => (
-  <div className="rounded-xl border border-dashed border-neutral-200 p-8 flex flex-col items-center justify-center text-center text-neutral-400 gap-2">
+  <div className="rounded-xl border border-dashed border-neutral-200 dark:border-[#3a3740] p-8 flex flex-col items-center justify-center text-center text-neutral-400 gap-2">
     {icon}
     <p className="text-sm">{message}</p>
   </div>

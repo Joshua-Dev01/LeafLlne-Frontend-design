@@ -2,7 +2,7 @@ import { Skeleton } from "../../../../../components/ui/skeleton";
 
 export default function NoteCardSkeleton() {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
+    <div className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] p-5">
       <div className="flex items-center justify-between mb-4">
         <Skeleton className="w-9 h-9 rounded-lg" />
         <Skeleton className="w-10 h-3 rounded" />

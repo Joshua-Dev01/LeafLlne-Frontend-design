@@ -48,8 +48,8 @@ export default function NotesGrid({ subjectId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-semibold text-neutral-900">Notes</h2>
-          <p className="text-sm text-neutral-500">Everything saved to this subject</p>
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Notes</h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">Everything saved to this subject</p>
         </div>
 
         <input
@@ -59,7 +59,7 @@ export default function NotesGrid({ subjectId }: Props) {
             setPage(1);
           }}
           placeholder="Search notes…"
-          className="px-3 py-2 rounded-full border border-neutral-200 bg-neutral-50 text-sm w-48 outline-none focus:border-violet-200"
+          className="px-3 py-2 rounded-full border border-neutral-200 dark:border-[#2e2b30] bg-neutral-50 dark:bg-[#1c1b1b] text-neutral-900 dark:text-white text-sm w-48 outline-none focus:border-violet-200"
         />
       </div>
 
@@ -86,7 +86,7 @@ export default function NotesGrid({ subjectId }: Props) {
               />
             ))
           ) : (
-            <div className="col-span-full text-center text-neutral-400 py-10">
+            <div className="col-span-full text-center text-neutral-400 dark:text-neutral-500 py-10">
               No notes yet — add your first one 👍
             </div>
           )}
@@ -98,7 +98,7 @@ export default function NotesGrid({ subjectId }: Props) {
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-1 rounded-md border border-neutral-200 text-sm text-neutral-600 disabled:opacity-40"
+          className="px-3 py-1 rounded-md border border-neutral-200 dark:border-[#2e2b30] text-sm text-neutral-600 dark:text-neutral-300 disabled:opacity-40"
         >
           Prev
         </button>
@@ -108,7 +108,7 @@ export default function NotesGrid({ subjectId }: Props) {
         <button
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= (data?.totalPages ?? 1)}
-          className="px-3 py-1 rounded-md border border-neutral-200 text-sm text-neutral-600 disabled:opacity-40"
+          className="px-3 py-1 rounded-md border border-neutral-200 dark:border-[#2e2b30] text-sm text-neutral-600 dark:text-neutral-300 disabled:opacity-40"
         >
           Next
         </button>

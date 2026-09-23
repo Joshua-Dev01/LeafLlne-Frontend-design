@@ -171,7 +171,7 @@ export default function NoteEditorPage() {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate("/dashboard/notes")}
-          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800"
+          className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" /> Back to notes
         </button>
@@ -181,7 +181,7 @@ export default function NoteEditorPage() {
           {!isNew && (
             <button
               onClick={() => confirm("Delete this note?") && delMutation.mutate()}
-              className="text-neutral-400 hover:text-red-600 transition"
+              className="text-neutral-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 transition"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -193,12 +193,12 @@ export default function NoteEditorPage() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Enter note title…"
-        className="w-full text-3xl font-semibold text-neutral-900 placeholder:text-neutral-300 outline-none bg-transparent"
+        className="w-full text-3xl font-semibold text-neutral-900 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-600 outline-none bg-transparent"
       />
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-neutral-400">Course:</span>
+          <span className="text-neutral-400 dark:text-neutral-500">Course:</span>
           <Select
             size="small"
             style={{ minWidth: 160 }}
@@ -213,7 +213,7 @@ export default function NoteEditorPage() {
         {tags.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 text-xs bg-violet-50 text-[#4b0082] px-2.5 py-1 rounded-full"
+            className="flex items-center gap-1 text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-2.5 py-1 rounded-full"
           >
             #{tag}
             <button onClick={() => setTags(tags.filter((t) => t !== tag))}>
@@ -228,14 +228,14 @@ export default function NoteEditorPage() {
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
             placeholder="add tag"
-            className="text-xs w-20 outline-none border-b border-dashed border-neutral-300 focus:border-neutral-500"
+            className="text-xs w-20 outline-none border-b border-dashed border-neutral-300 dark:border-neutral-600 dark:text-white bg-transparent focus:border-neutral-500"
           />
-          <button onClick={addTag} className="text-neutral-400 hover:text-neutral-700">
+          <button onClick={addTag} className="text-neutral-400 dark:hover:text-neutral-200 hover:text-neutral-700">
             <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <label className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-neutral-200 text-neutral-600 hover:border-violet-200 hover:text-[#4b0082] cursor-pointer transition">
+        <label className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-[#2e2b30] text-neutral-600 dark:text-neutral-300 hover:border-violet-200 dark:hover:border-[#9d4edd] hover:text-[#4b0082] dark:hover:text-[#9d4edd] cursor-pointer transition">
           <Paperclip className="w-3.5 h-3.5" />
           {pendingFile ? pendingFile.name : noteData?.note?.fileUrl ? "Replace file" : "Upload PDF"}
           <input
@@ -251,7 +251,7 @@ export default function NoteEditorPage() {
           href={noteData.note.fileUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-[#4b0082] underline underline-offset-2"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-[#4b0082] dark:hover:text-[#9d4edd] underline underline-offset-2"
         >
           <Paperclip className="w-3.5 h-3.5" /> View attached file
         </a>
@@ -260,7 +260,7 @@ export default function NoteEditorPage() {
       <RichTextEditor content={content} onChange={setContent} />
 
       {!subjects || subjects.length === 0 ? (
-        <p className="text-sm text-amber-600">
+        <p className="text-sm text-amber-600 dark:text-amber-400">
           You don't have any courses yet — create a subject first so this note has somewhere to live.
         </p>
       ) : null}
@@ -281,7 +281,7 @@ const SaveIndicator = ({ status }: { status: SaveStatus }) => {
   return (
     <span
       className={`text-xs ${
-        status === "error" ? "text-red-500" : "text-neutral-400"
+        status === "error" ? "text-red-500 dark:text-red-400" : "text-neutral-400 dark:text-neutral-500"
       }`}
     >
       {label}

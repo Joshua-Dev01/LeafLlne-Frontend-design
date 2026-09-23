@@ -26,7 +26,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm max-w-none focus:outline-none min-h-[300px] text-neutral-800",
+          "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[300px] text-neutral-800 dark:text-neutral-100",
       },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -54,8 +54,8 @@ export default function RichTextEditor({
   };
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-neutral-100">
+    <div className="rounded-xl border border-neutral-200 dark:border-[#2e2b30] bg-white dark:bg-[#1c1b1b] overflow-hidden">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-neutral-100 dark:border-[#2e2b30]">
         <ToolbarButton
           active={editor.isActive("bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -74,7 +74,7 @@ export default function RichTextEditor({
         >
           <List className="w-4 h-4" />
         </ToolbarButton>
-        <div className="w-px h-5 bg-neutral-200 mx-1" />
+        <div className="w-px h-5 bg-neutral-200 dark:bg-[#2e2b30] mx-1" />
         <ToolbarButton active={editor.isActive("link")} onClick={addLink}>
           <Link2 className="w-4 h-4" />
         </ToolbarButton>
@@ -109,7 +109,7 @@ const ToolbarButton = ({
     type="button"
     onClick={onClick}
     className={`w-8 h-8 flex items-center justify-center rounded-lg transition ${
-      active ? "bg-violet-100 text-[#4b0082]" : "text-neutral-500 hover:bg-neutral-100"
+      active ? "bg-violet-100 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd]" : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[#262525]"
     }`}
   >
     {children}
