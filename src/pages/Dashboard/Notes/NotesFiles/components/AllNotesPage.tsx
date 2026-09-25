@@ -1,41 +1,31 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, UploadCloud } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search, Plus, GraduationCap, Layers, ArrowLeft, ArrowRight } from "lucide-react";
 
-import {  deleteNote, getAllNotes } from "../api/notesFlies.api";
+import { getAllNotes } from "../api/notesFlies.api";
 import { getSubjects } from "../../api/subject.api";
-import { handleResponse } from "../../../../../utils/handleErrors";
-import NoteCard from "./NoteCard";
+import NotesTable from "./NotesTable";
+import DeleteNote from "./DeleteNote";
+import EditNoteModal from "./Editnotemodal";
 import AddNoteModal from "./Addnotemodal";
-import NoteCardSkeleton from "./Notecardskeleton";
+import type { Note } from "../interface/notes";
 
 const PAGE_SIZE = 6;
 
 export default function AllNotesPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [subjectFilter, setSubjectFilter] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [editTarget, setEditTarget] = useState<Note | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
 
   const { data: subjects } = useQuery({ queryKey: ["subjects"], queryFn: getSubjects });
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["notes", "all", subjectFilter, search, page],
-    queryFn: () =>
-      getAllNotes({ subjectId: subjectFilter, search, page, limit: PAGE_SIZE }),
+    queryFn: () => getAllNotes({ subjectId: subjectFilter, search, page, limit: PAGE_SIZE }),
     placeholderData: (prev) => prev,
-  });
-
-  const delMutation = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      handleResponse({ successCondition: true, successMsg: "Note deleted" });
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-    onError: (err) => handleResponse({ error: err }),
   });
 
   const totalUnits = useMemo(
@@ -44,56 +34,57 @@ export default function AllNotesPage() {
   );
 
   const notes = data?.notes ?? [];
-  const hasMore = data ? page < data.totalPages : false;
+  const totalPages = data?.totalPages ?? 1;
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleSelectAll = () =>
+    setSelectedIds((prev) => (prev.length === notes.length ? [] : notes.map((n) => n._id)));
+
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (page <= 3) return [1, 2, 3, "...", totalPages];
+    if (page >= totalPages - 2) return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", page, "...", totalPages];
+  }, [page, totalPages]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#2e0052] dark:text-white">Study Notes</h1>
+          <h1 className="text-3xl font-bold text-black dark:text-white">Study Notes</h1>
           <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">
             Manage your academic insights and research materials.
           </p>
-          <div className="flex gap-2 mt-3 items-center">
-            <span className="text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-3 py-1 rounded-full font-medium">
+          <div className="flex gap-2 mt-3 items-center flex-wrap">
+            <span className="flex items-center gap-1.5 text-xs bg-purple-600 text-white px-3 py-1.5 rounded-full font-semibold">
+              <GraduationCap className="w-3.5 h-3.5" />
               {subjects?.length ?? 0} Courses
             </span>
-            <span className="text-xs bg-violet-50 dark:bg-[#9d4edd]/15 text-[#4b0082] dark:text-[#9d4edd] px-3 py-1 rounded-full font-medium">
+            <span className="flex items-center gap-1.5 text-xs bg-purple-50 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full font-semibold">
+              <Layers className="w-3.5 h-3.5" />
               {totalUnits} Total Units
             </span>
-            <Link
-              to="/dashboard/notes/subjects"
-              className="text-xs text-neutral-400 hover:text-[#4b0082] dark:hover:text-[#9d4edd] underline underline-offset-2 ml-1"
-            >
-              Manage courses
-            </Link>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/dashboard/notes/new")}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg text-white dark:text-[#201f1f] font-medium bg-[#2e0052] dark:bg-[#e0b6ff] hover:bg-[#3d0069] dark:hover:bg-[#eccbff] transition"
-          >
-            <Plus className="w-4 h-4" /> New Note
-          </button>
           <AddNoteModal />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search your notes…"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-full border border-neutral-200 dark:border-[#2e2b30] bg-neutral-50 dark:bg-[#1c1b1b] text-neutral-900 dark:text-white outline-none focus:border-violet-200"
-          />
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Search your workspace…"
+          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-full border border-neutral-200 dark:border-purple-900/30 bg-neutral-50 dark:bg-[#111111] text-neutral-900 dark:text-white outline-none focus:border-purple-300 dark:focus:border-purple-500"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -119,48 +110,74 @@ export default function AllNotesPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <NoteCardSkeleton key={i} />
-          ))}
+        <div className="rounded-2xl border border-neutral-200 dark:border-purple-900/30 bg-white dark:bg-black p-10 text-center text-neutral-400 text-sm">
+          Loading notes…
         </div>
       ) : notes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-neutral-200 dark:border-[#3a3740] p-14 flex flex-col items-center text-center text-neutral-400 gap-3">
-          <UploadCloud className="w-6 h-6" />
+        <div className="rounded-2xl border border-dashed border-neutral-200 dark:border-purple-900/30 p-14 flex flex-col items-center text-center text-neutral-400 gap-3">
+          <Plus className="w-6 h-6" />
           <p className="text-sm">
-            {subjectFilter || search
-              ? "No notes match this filter yet."
-              : "No notes yet — create your first one."}
+            {subjectFilter || search ? "No notes match this filter yet." : "No notes yet — create your first one."}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {notes.map((note) => (
-            <NoteCard
-              key={note._id}
-              note={note}
-              menuOpen={openMenuId === note._id}
-              onToggleMenu={() => setOpenMenuId(openMenuId === note._id ? null : note._id)}
-              onDelete={() => {
-                if (confirm("Delete this note?")) delMutation.mutate(note._id);
-                setOpenMenuId(null);
-              }}
-            />
-          ))}
+        <NotesTable
+          notes={notes}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onToggleSelectAll={toggleSelectAll}
+          onEdit={(note) => setEditTarget(note)}
+          onDelete={(note) => setDeleteTarget(note)}
+        />
+      )}
+
+      {!isLoading && notes.length > 0 && (
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Showing <span className="font-semibold text-neutral-800 dark:text-white">{(page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, data?.total ?? 0)}</span> of{" "}
+            <span className="font-semibold text-neutral-800 dark:text-white">{data?.total ?? 0}</span> notes
+          </p>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-purple-900/30 text-xs text-neutral-600 dark:text-neutral-300 disabled:opacity-40 hover:border-purple-300 dark:hover:border-purple-500/50 transition"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Previous
+            </button>
+
+            {pageNumbers.map((n, i) =>
+              n === "..." ? (
+                <span key={`dots-${i}`} className="px-2 text-neutral-400 text-xs">…</span>
+              ) : (
+                <button
+                  key={n}
+                  onClick={() => setPage(n as number)}
+                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${
+                    page === n
+                      ? "bg-purple-600 text-white"
+                      : "text-neutral-500 dark:text-neutral-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                  }`}
+                >
+                  {n}
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-purple-900/30 text-xs text-neutral-600 dark:text-neutral-300 disabled:opacity-40 hover:border-purple-300 dark:hover:border-purple-500/50 transition"
+            >
+              Next <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
-      {hasMore && (
-        <div className="flex justify-center">
-          <button
-            onClick={() => setPage((p) => p + 1)}
-            disabled={isFetching}
-            className="text-sm px-5 py-2 rounded-full border border-neutral-200 dark:border-[#2e2b30] text-neutral-600 dark:text-neutral-300 hover:border-violet-200 dark:hover:border-[#9d4edd] hover:text-[#4b0082] dark:hover:text-[#9d4edd] transition disabled:opacity-50"
-          >
-            {isFetching ? "Loading…" : "Load More Notes"}
-          </button>
-        </div>
-      )}
+      <EditNoteModal note={editTarget} open={!!editTarget} onClose={() => setEditTarget(null)} />
+      <DeleteNote note={deleteTarget} open={!!deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }
@@ -178,8 +195,8 @@ const FilterPill = ({
     onClick={onClick}
     className={`text-sm px-4 py-1.5 rounded-full font-medium transition ${
       active
-        ? "bg-[#2e0052] dark:bg-[#e0b6ff] text-white dark:text-[#201f1f]"
-        : "bg-neutral-100 dark:bg-[#1c1b1b] text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#262525]"
+        ? "bg-black dark:bg-purple-600 text-white"
+        : "bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-white/10"
     }`}
   >
     {label}

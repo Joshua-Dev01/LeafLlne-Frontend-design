@@ -1,6 +1,6 @@
 // src/pages/Dashboard/Notes/router/SubjectsRoutes.tsx
 import { Subject } from "../components/Subject";
-import AllNotesPage from "../NotesFiles/components/AllNotesPage";
+// import AllNotesPage from "../NotesFiles/components/AllNotesPage";
 import NoteEditorPage from "../NotesFiles/components/Noteeditorpage";
 import SubjectNotesPage from "../NotesFiles/components/Subjectnotespage";
 
@@ -12,7 +12,7 @@ const SubjectsRouter = [
       {
         // Unified "Study Notes" view — all notes across subjects, filterable by pill
         index: true,
-        element: <AllNotesPage />,
+        element: <Subject />,
       },
       {
         // Manage courses/subjects (create, edit, delete) — no longer the default landing

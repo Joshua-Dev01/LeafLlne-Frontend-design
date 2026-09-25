@@ -53,7 +53,7 @@ const LeaflineSidebar = () => {
       <motion.aside
         variants={sidebarVariants}
         animate={collapsed ? "collapsed" : "open"}
-        className="bg-white dark:bg-[#1c1b1b] text-[#171223] dark:text-white h-full
+        className="bg-white dark:bg-[#080808] text-[#171223] dark:text-white h-full
         border-r border-neutral-200 dark:border-[#2e2b30]
         p-4 flex flex-col"
       >
