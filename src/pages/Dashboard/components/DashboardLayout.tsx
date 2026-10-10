@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Outlet } from "react-router-dom";
 import Navbar from "./NavBar";
 import LeaflineSidebar from "./SideBar";
-// import { RiMenu2Line } from "react-icons/ri";
-import { Menu } from "lucide-react";
+import MobileTopBar from "./MobileTopBar";
+import MobileBottomNav from "./MobileBottomNav";
 
 const DashboardLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -41,22 +41,20 @@ const DashboardLayout = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col shadow-2xl">
-        {/* Top Navbar */}
-        <div className="flex items-center  py-2 ">
-          <button
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="md:hidden text-blue-600 !text-2xl px-5"
-          >
-            <Menu className="text-black cursor-pointer dark:text-white   w-6 h-6" />
-          </button>
+      <div className="flex-1 flex flex-col shadow-2xl overflow-hidden">
+        {/* Top bar — compact logo/menu/avatar bar on mobile, full search navbar on desktop */}
+        <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+        <div className="hidden md:flex items-center py-2">
           <Navbar />
         </div>
 
         {/* Routed Page Content */}
-        <main className="py-4 px-10 flex-1  overflow-auto">
+        <main className="py-4 px-4 md:px-10 flex-1 overflow-auto pb-20 md:pb-4">
           <Outlet />
         </main>
+
+        {/* Bottom tab bar on mobile */}
+        <MobileBottomNav />
       </div>
     </div>
   );

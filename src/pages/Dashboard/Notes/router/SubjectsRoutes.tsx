@@ -1,8 +1,9 @@
 // src/pages/Dashboard/Notes/router/SubjectsRoutes.tsx
 import { Subject } from "../components/Subject";
+import AllNotesPage from "../NotesFiles/components/AllNotesPage";
 // import AllNotesPage from "../NotesFiles/components/AllNotesPage";
 import NoteEditorPage from "../NotesFiles/components/Noteeditorpage";
-import SubjectNotesPage from "../NotesFiles/components/Subjectnotespage";
+// import SubjectNotesPage from "../NotesFiles/components/Subjectnotespage";
 
 
 const SubjectsRouter = [
@@ -22,7 +23,7 @@ const SubjectsRouter = [
       {
         // Browse notes scoped to one subject (linked from the subjects page)
         path: "viewNotes/:subjectId",
-        element: <SubjectNotesPage />,
+        element: <AllNotesPage />,
       },
       {
         // Rich-text editor — handles both creating and editing a note

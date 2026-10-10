@@ -1,173 +1,119 @@
-// src/features/notes/pages/ViewNotePage.tsx
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteNote, getNoteById } from "../api/notesFlies.api";
-import { handleResponse } from "../../../../../utils/handleErrors";
-import { Skeleton } from "../../../../../components/ui/skeleton";
-import { formatBytes } from "../utilities/formatBytes";
-
-import { MoreVertical, Edit, Trash2, Download, Eye } from "lucide-react";
 import { useState } from "react";
-import classNames from "classnames";
-import { EmptyState } from "../../../../../components/Empty/EmptyState";
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Search } from "lucide-react";
+
+import { getNotesBySubject } from "../api/notesFlies.api";
+import NotesTable from "./NotesTable";
+import DeleteNote from "./DeleteNote";
 import EditNoteModal from "./Editnotemodal";
+import AddNoteModal from "./Addnotemodal";
+import type { Note } from "../interface/notes";
+import NotesTableSkeleton from "./Notestableskeleton";
 
-export default function ViewNotePage() {
-  const { noteId } = useParams<{ noteId: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [showMenu, setShowMenu] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+const PAGE_SIZE = 12;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["note", noteId],
-    queryFn: () => getNoteById(noteId!),
-    enabled: !!noteId,
+export default function ViewNote() {
+  const { subjectId } = useParams<{ subjectId: string }>();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [editTarget, setEditTarget] = useState<Note | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["notes", subjectId, search, page],
+    queryFn: () => getNotesBySubject(subjectId!, { search, page, limit: PAGE_SIZE }),
+    enabled: !!subjectId,
+    placeholderData: (prev) => prev,
   });
 
-  const delMutation = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      handleResponse({ successCondition: true, successMsg: "Deleted" });
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      navigate(-1);
-    },
-    onError: (err) => handleResponse({ error: err }),
-  });
-
-  if (isLoading) {
-    return <Skeleton className="h-80 w-full rounded-xl" />;
+  if (!subjectId) {
+    return <div className="text-center text-neutral-400 py-10">No subject selected.</div>;
   }
 
-  const note: any = data?.note;
-  if (!note) return <div className="text-center"><EmptyState /></div>;
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
-  const previewArea = () => {
-    const mime = note.fileMimeType?.toLowerCase() || "";
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-    if (!note.fileUrl) {
-      return <div className="text-center py-20">No preview available</div>;
-    }
-
-    if (mime.includes("pdf")) {
-      return (
-        <iframe
-          src={note.fileUrl}
-          className="w-full h-[70vh] rounded-xl border"
-        />
-      );
-    }
-
-    if (mime.includes("image")) {
-      return (
-        <img
-          src={note.fileUrl}
-          className="max-h-[70vh] mx-auto rounded-xl"
-          alt={note.title}
-        />
-      );
-    }
-
-    return (
-      <div className="py-20 flex flex-col items-center">
-        <p className="mb-3 text-sm text-muted-foreground">
-          Preview not available
-        </p>
-        <a
-          href={note.fileUrl}
-          download={note.title}
-          target="_blank"
-          rel="noreferrer"
-          className="underline text-blue-500"
-        >
-          Download File
-        </a>
-      </div>
-    );
-  };
-
-  const downloadFile = () => {
-    const link = document.createElement("a");
-    link.href = note.fileUrl;
-    link.download = note.title;
-    link.click();
-  };
+  const toggleSelectAll = () =>
+    setSelectedIds((prev) => (prev.length === notes.length ? [] : notes.map((n) => n._id)));
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-2xl font-bold">{note.title}</h1>
-          <p className="text-sm text-muted-foreground">{note.description}</p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <Link
+          to="/dashboard/notes"
+          className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to subjects
+        </Link>
+        <AddNoteModal subjectId={subjectId} />
+      </div>
 
-          <p className="text-xs mt-2 text-muted-foreground">
-            {formatBytes(note.fileSize)} •{" "}
-            {new Date(note.createdAt).toLocaleString()}
-          </p>
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Notes</h1>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+          Everything saved to this subject
+        </p>
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Search notes…"
+          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-full border border-neutral-200 dark:border-purple-900/30 bg-neutral-50 dark:bg-[#111111] text-neutral-900 dark:text-white outline-none focus:border-purple-300 dark:focus:border-purple-500"
+        />
+      </div>
+
+      {isError ? (
+        <div className="text-red-500 text-sm">Failed to load notes</div>
+      ) : isLoading ? (
+        <NotesTableSkeleton />
+      ) : notes.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 dark:border-purple-900/30 p-14 text-center text-neutral-400 text-sm">
+          {search ? "No notes match this search." : "No notes yet — add your first one."}
         </div>
+      ) : (
+        <NotesTable
+          notes={notes}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onToggleSelectAll={toggleSelectAll}
+          onEdit={(note) => setEditTarget(note)}
+          onDelete={(note) => setDeleteTarget(note)}
+        />
+      )}
 
-        {/* ACTION MENU */}
-        <div className="relative">
+      {!isLoading && notes.length > 0 && (
+        <div className="flex items-center justify-center gap-3">
           <button
-            className="p-2 rounded-full hover:bg-white/10"
-            onClick={() => setShowMenu((prev) => !prev)}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1 rounded-md border border-neutral-200 dark:border-purple-900/30 text-sm text-neutral-600 dark:text-neutral-300 disabled:opacity-40"
           >
-            <MoreVertical />
+            Prev
           </button>
-
-          {showMenu && (
-            <div
-              className={classNames(
-                "absolute right-0 mt-2 p-2 w-32 rounded-xl",
-                "bg-white/10 backdrop-blur-xl shadow-md z-10 space-y-1"
-              )}
-            >
-              <button
-                className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => downloadFile()}
-              >
-                <Download size={16} /> Download
-              </button>
-
-              <button
-                className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => navigate(note.fileUrl)}
-              >
-                <Eye size={16} /> View Raw
-              </button>
-
-              <button
-                className="flex items-center gap-2 w-full text-sm hover:bg-white/20 px-2 py-1 rounded-md"
-                onClick={() => {
-                  setEditOpen(true);
-                  setShowMenu(false);
-                }}
-              >
-                <Edit size={16} /> Edit
-              </button>
-
-              <button
-                className="flex items-center gap-2 w-full text-sm text-red-400 hover:bg-red-500/20 px-2 py-1 rounded-md"
-                onClick={() => {
-                  if (confirm("Delete this file?")) {
-                    delMutation.mutate(note._id);
-                  }
-                }}
-              >
-                <Trash2 size={16} /> Delete
-              </button>
-            </div>
-          )}
+          <span className="text-sm text-neutral-400">{page} / {totalPages}</span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="px-3 py-1 rounded-md border border-neutral-200 dark:border-purple-900/30 text-sm text-neutral-600 dark:text-neutral-300 disabled:opacity-40"
+          >
+            Next
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* File Preview */}
-      <div className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm">
-        {previewArea()}
-      </div>
-
-      <EditNoteModal note={note} open={editOpen} onClose={() => setEditOpen(false)} />
+      <EditNoteModal note={editTarget} open={!!editTarget} onClose={() => setEditTarget(null)} />
+      <DeleteNote note={deleteTarget} open={!!deleteTarget} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 }
