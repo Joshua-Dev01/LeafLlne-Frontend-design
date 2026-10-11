@@ -1,30 +1,15 @@
 // src/pages/Dashboard/components/MobileBottomNav.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LayoutGrid, Search, Bell, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 import SearchBar from "../../../components/search/search";
-import { getNotifications } from "../notifications/api/api";
-import type { NotificationResponse } from "../notifications/interface/notificationTypes";
+import { useNotificationSummary } from "../notifications/hooks/useNotifications";
 
 const MobileBottomNav = () => {
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await getNotifications();
-        setNotifications(res || []);
-      } catch {
-        setNotifications([]);
-      }
-    };
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: notificationSummary } = useNotificationSummary();
 
   const isActive = (path: string) =>
     path === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(path);
@@ -49,7 +34,7 @@ const MobileBottomNav = () => {
             label="Alerts"
             to="/dashboard/notifications"
             active={isActive("/dashboard/notifications")}
-            badge={notifications.length > 0}
+            badge={(notificationSummary?.unread ?? 0) > 0}
           />
           <NavTab
             icon={User}

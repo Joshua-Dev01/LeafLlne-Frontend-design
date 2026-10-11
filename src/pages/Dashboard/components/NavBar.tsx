@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, Badge } from "antd";
 import {
   SettingOutlined,
@@ -18,31 +18,16 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import SearchBar from "../../../components/search/search";
 import LogoutButton from "../../../features/auth/logout/logout";
-import { getNotifications } from "../notifications/api/api";
-import type { NotificationResponse } from "../notifications/interface/notificationTypes";
+import { useNotificationSummary } from "../notifications/hooks/useNotifications";
 import { useCurrentUser } from "../DashboardHome/hooks/Usecurrentuser";
 
 const Navbar = () => {
   const user = useCurrentUser();
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
+  const { data: notificationSummary } = useNotificationSummary();
+  const unreadCount = notificationSummary?.unread ?? 0;
   const [searchOpen, setSearchOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await getNotifications();
-        setNotifications(res || []);
-      } catch (err) {
-        console.error("Failed to fetch notifications", err);
-        setNotifications([]);
-      }
-    };
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="w-full py-3 px-4 sm:px-7 flex items-center justify-between gap-4 border-b border-neutral-200 dark:border-[#2e2b30]">
@@ -64,7 +49,7 @@ const Navbar = () => {
       <div className="flex items-center gap-4 sm:gap-6 shrink-0">
         {/* Notifications */}
         <Link to="notifications">
-          <Badge count={notifications.length} size="small">
+          <Badge count={unreadCount} overflowCount={99} size="small">
             <span className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-[#2e2b30] text-neutral-500 hover:text-[#4b0082] dark:hover:text-[#9d4edd] hover:border-violet-200 transition">
               <Bell className="w-[18px] h-[18px]" />
             </span>
