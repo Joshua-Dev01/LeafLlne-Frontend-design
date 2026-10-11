@@ -3,6 +3,7 @@
 // import SettingsSidebar from "./SettingsSidebar";
 
 import SettingsHeader from "../../../../features/auth/profile/components/ProfilePhoto";
+import LogoutButton from "../../../../features/auth/logout/logout";
 import SettingsTabs from "./SettingsTabs ";
 
 export const Settings = () => {
@@ -20,6 +21,10 @@ export const Settings = () => {
         {/* <SettingsSidebar userName={userName} /> ✅ Pass name here */}
         <SettingsHeader />
         <SettingsTabs />
+
+        <div className="mt-8 flex justify-end px-4 pb-6">
+          <LogoutButton />
+        </div>
       </div>
 
       {/* Main Content */}

@@ -8,6 +8,7 @@ import DashboardMainHome from "../DashboardHome/components/DashboardMainHome";
 import EventsRouter from "../Events/routes/eventsRoutes";
 import { Analytics } from "../Charts/analytics";
 import ProjectsWrapper from "../projects/ProjectsWrapper";
+import LibraryRouter from "../Library/routes/libraryRoutes";
 
 const DashboardRoutes = [
   {
@@ -30,6 +31,7 @@ const DashboardRoutes = [
         element: <ProjectsWrapper />,
       },
       ...SubjectsRouter,
+      ...LibraryRouter,
       ...SettingsRoutes,
       ...EventsRouter,
       {
