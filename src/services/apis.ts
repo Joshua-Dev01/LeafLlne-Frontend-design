@@ -1,5 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import NProgress from "nprogress";
+import {
+  requestFailed,
+  requestStarted,
+  requestSucceeded,
+} from "../lib/networkMonitor";
 
 // Use environment variable for base URL
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -16,6 +21,7 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     NProgress.start();
+    requestStarted(config);
     const token = localStorage.getItem("token");
 
     if (token) {
@@ -36,10 +42,12 @@ export default axiosInstance;
 axiosInstance.interceptors.response.use(
   (response) => {
     NProgress.done();
+    requestSucceeded(response.config);
     return response;
   },
   (error: AxiosError) => {
     NProgress.done();
+    requestFailed(error.config, error);
     const status = error.response?.status;
 
     // Extract backend custom message
