@@ -27,13 +27,14 @@ import { Avatar, ConfirmDialog, ProgressBar, ProjectIcon, StatusChip } from "../
 import { ProjectFormModal } from "../components/ProjectFormModal";
 import type { TaskStats, TaskStatus } from "../interface/ProjectType";
 import { COLOR_STYLES, TONE_TEXT, dueInfo, fmtDate } from "../utils/projectTheme";
-import { ActivityRow, ActivityTab, DiscussionTab, FilesTab } from "./EngageTabs";
+import { ActivityTab, DiscussionTab, FilesTab } from "./EngageTabs";
 import { InviteModal, PeoplePanel } from "./PeoplePanel";
+import { TeamTable } from "./TeamTable";
 import { TaskBoard } from "./TaskBoard";
 import { TaskModal } from "./TaskModal";
-import { useActivity } from "../api/useProject";
+import { TaskDrawer } from "./TaskDrawer";
 
-type Tab = "tasks" | "overview" | "files" | "discussion" | "activity";
+type Tab = "tasks" | "team" | "overview" | "files" | "discussion" | "activity";
 
 const statsFrom = (tasks: { status: TaskStatus; dueDate: string | null }[]): TaskStats => {
   const total = tasks.length;
@@ -58,7 +59,6 @@ const ProjectDetailPage = () => {
   const { data, isLoading, isError } = useProject(projectId);
   const { data: tasks } = useTasks(projectId);
   const { data: files } = useFiles(projectId);
-  const { data: recent } = useActivity(projectId, 1);
   const { archive, restore, duplicate, remove } = useProjectMutations();
 
   const [tab, setTab] = useState<Tab>("tasks");
@@ -67,6 +67,7 @@ const ProjectDetailPage = () => {
     taskId: null,
     status: "not-started",
   });
+  const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [inviting, setInviting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -125,11 +126,17 @@ const ProjectDetailPage = () => {
   const due = dueInfo(project.deadline, completed);
   const c = COLOR_STYLES[project.color];
 
-  const openTask = (id: string) => setTaskModal({ open: true, taskId: id, status: "not-started" });
+  // Clicking a task slides in the details panel; Edit hands off to the modal.
+  const openTask = (id: string) => setDrawerTaskId(id);
+  const editTask = (id: string) => {
+    setDrawerTaskId(null);
+    setTaskModal({ open: true, taskId: id, status: "not-started" });
+  };
   const addTask = (s: TaskStatus = "not-started") => setTaskModal({ open: true, taskId: null, status: s });
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "tasks", label: `Tasks (${stats.completed}/${stats.total})` },
+    { key: "team", label: `Team (${project.members.length})` },
     { key: "overview", label: "Overview" },
     { key: "files", label: `Files${files ? ` (${files.length})` : ""}` },
     { key: "discussion", label: "Discussion" },
@@ -263,69 +270,86 @@ const ProjectDetailPage = () => {
       )}
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111111]">
-        <div className={cn("absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r", c.grad)} />
-        <div className={cn("absolute -top-24 -right-16 w-72 h-72 rounded-full blur-3xl opacity-20 bg-gradient-to-br", c.grad)} />
-        <div className="relative grid lg:grid-cols-[1fr_340px] gap-6 p-5 sm:p-7">
-          <div className="space-y-4 min-w-0">
-            <div className="flex items-start gap-4">
-              <ProjectIcon icon={project.icon} color={project.color} size={56} />
+      <section className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111111]">
+        <span className={cn("absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b", c.grad)} />
+        <div className="p-4 sm:p-5 pl-6 sm:pl-7 space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
+            {/* Identity */}
+            <div className="flex items-start gap-3.5 min-w-0 flex-1">
+              <ProjectIcon icon={project.icon} color={project.color} size={44} />
               <div className="min-w-0">
-                <p className={cn("text-[11px] font-bold uppercase tracking-widest", c.text)}>{project.category}</p>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white break-words">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white break-words">
                   {project.title}
                 </h1>
+                {project.description && (
+                  <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 max-w-2xl">
+                    {project.description}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex items-center -space-x-2">
+                    {project.members.slice(0, 5).map((m) => (
+                      <Avatar key={m._id} person={m} size={26} ring />
+                    ))}
+                    {project.members.length > 5 && (
+                      <span className="w-[26px] h-[26px] rounded-full ring-2 ring-white dark:ring-[#111111] bg-neutral-100 dark:bg-white/10 text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex items-center justify-center">
+                        +{project.members.length - 5}
+                      </span>
+                    )}
+                  </div>
+                  {isOwner && writable && project.visibility === "team" && (
+                    <button
+                      onClick={() => setInviting(true)}
+                      className={cn("inline-flex items-center gap-1.5 text-xs font-semibold hover:underline cursor-pointer", c.text)}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" /> Invite
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-            {project.description && (
-              <p className="text-sm sm:text-[15px] text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap max-w-3xl">
-                {project.description}
-              </p>
-            )}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center -space-x-2">
-                {project.members.slice(0, 6).map((m) => (
-                  <Avatar key={m._id} person={m} size={32} ring />
-                ))}
-              </div>
-              {isOwner && writable && project.visibility === "team" && (
-                <button
-                  onClick={() => setInviting(true)}
-                  className={cn("inline-flex items-center gap-1.5 text-sm font-semibold hover:underline cursor-pointer", c.text)}
-                >
-                  <UserPlus className="w-4 h-4" /> Invite classmate
-                </button>
-              )}
-            </div>
+
+            {/* Numbers */}
+            <dl className="grid grid-cols-4 gap-2 lg:w-[360px] shrink-0">
+              {[
+                { label: "Progress", value: `${stats.percent}%`, tone: c.soft },
+                {
+                  label: "Done",
+                  value: `${stats.completed}/${stats.total}`,
+                  tone: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
+                },
+                {
+                  label: "Active",
+                  value: String(stats.total - stats.completed),
+                  tone: "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300",
+                },
+                {
+                  label: "Overdue",
+                  value: String(stats.overdue),
+                  tone:
+                    stats.overdue > 0
+                      ? "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+                      : "bg-neutral-100 text-neutral-500 dark:bg-white/5 dark:text-neutral-400",
+                },
+              ].map((m) => (
+                <div key={m.label} className={cn("rounded-xl px-3 py-2", m.tone)}>
+                  <dd className="text-lg font-bold leading-tight">{m.value}</dd>
+                  <dt className="text-[11px] font-medium opacity-70">{m.label}</dt>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <div className="rounded-2xl p-5 bg-neutral-50 dark:bg-white/5 border border-neutral-100 dark:border-white/5 space-y-3 self-start">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500">Progress</p>
-                <p className="text-3xl font-bold text-neutral-900 dark:text-white">
-                  {stats.percent}% <span className="text-base font-semibold text-neutral-400">done</span>
-                </p>
-              </div>
-              <span className={cn("rounded-lg px-2.5 py-1 text-xs font-bold font-mono", c.soft)}>
-                {stats.completed}/{stats.total} tasks
-              </span>
+          {/* Progress strip */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <ProgressBar percent={stats.percent} color={project.color} height={6} label="Project progress" />
             </div>
-            <ProgressBar percent={stats.percent} color={project.color} height={10} label="Project progress" />
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-violet-500" /> {stats.total - stats.completed} active
+            {project.deadline && (
+              <span className="text-xs text-neutral-500 font-mono whitespace-nowrap">
+                Target {fmtDate(project.deadline)}
               </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" /> {stats.completed} closed
-              </span>
-              {stats.overdue > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" /> {stats.overdue} overdue
-                </span>
-              )}
-              {project.deadline && <span className="ml-auto font-mono">Target: {fmtDate(project.deadline)}</span>}
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -355,41 +379,23 @@ const ProjectDetailPage = () => {
 
       {/* Tab content */}
       {tab === "tasks" && (
-        <div className="grid xl:grid-cols-[1fr_320px] gap-5 items-start">
-          <TaskBoard
-            projectId={projectId}
-            color={project.color}
-            members={project.members}
-            writable={writable}
-            onOpenTask={openTask}
-            onAddTask={addTask}
-          />
-          <div className="space-y-5">
-            <PeoplePanel
-              project={project}
-              pending={data.pendingInvitations}
-              onInvite={() => setInviting(true)}
-              onLeft={() => navigate("/dashboard/projects")}
-            />
-            <section className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111111] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Recent activity</h3>
-                <button onClick={() => setTab("activity")} className="text-xs font-medium text-violet-600 dark:text-violet-300 hover:underline cursor-pointer">
-                  View all
-                </button>
-              </div>
-              {recent?.activity.length ? (
-                <ul className="space-y-3">
-                  {recent.activity.slice(0, 5).map((a) => (
-                    <ActivityRow key={a._id} a={a} />
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-neutral-400">Nothing yet.</p>
-              )}
-            </section>
-          </div>
-        </div>
+        <TaskBoard
+          projectId={projectId}
+          color={project.color}
+          members={project.members}
+          writable={writable}
+          onOpenTask={openTask}
+          onAddTask={addTask}
+        />
+      )}
+
+      {tab === "team" && (
+        <TeamTable
+          project={project}
+          pending={data.pendingInvitations}
+          onInvite={() => setInviting(true)}
+          onLeft={() => navigate("/dashboard/projects")}
+        />
       )}
 
       {tab === "overview" && (
@@ -440,7 +446,15 @@ const ProjectDetailPage = () => {
       {tab === "discussion" && <DiscussionTab projectId={projectId} writable={writable} />}
       {tab === "activity" && <ActivityTab projectId={projectId} />}
 
-      {/* Modals */}
+      {/* Task details panel + modals */}
+      <TaskDrawer
+        open={!!drawerTaskId}
+        onClose={() => setDrawerTaskId(null)}
+        projectId={projectId}
+        taskId={drawerTaskId}
+        writable={writable}
+        onEdit={editTask}
+      />
       <TaskModal
         open={taskModal.open}
         onClose={() => setTaskModal((s) => ({ ...s, open: false }))}

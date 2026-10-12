@@ -2,48 +2,73 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
+  ArrowUpDown,
   FolderPlus,
   FolderSearch,
-  LayoutGrid,
-  List,
   Plus,
   Search,
-  Sparkles,
+  SlidersHorizontal,
+  // Sparkles,
   X,
   FileX2,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import {
   EmptyBlock,
-  FilterSelect,
   GhostButton,
   Pagination,
   PrimaryButton,
   fieldClass,
 } from "../Library/components/LibraryBits";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 import { useDebounced } from "../Library/hooks/libraryHooks";
 import { useProjectMutations, useProjectSummary, useProjects } from "./api/useProject";
 import { CardSkeleton } from "./components/Bits";
 import { InvitationsBanner, SummaryCards } from "./components/OverviewWidgets";
-import { ProjectCard } from "./components/ProjectCard";
 import { ProjectFormModal } from "./components/ProjectFormModal";
 import type { ListParams } from "./interface/ProjectType";
 import { CATEGORIES } from "./utils/projectTheme";
+import { ProjectTable } from "./components/Projecttable";
 
 type Tab = NonNullable<ListParams["tab"]>;
 
-const readView = (): "grid" | "list" => {
-  try {
-    return localStorage.getItem("projects:view") === "list" ? "list" : "grid";
-  } catch {
-    return "grid";
-  }
-};
+const ALL = "__all__"; // radio items need a non-empty value, so "no filter" uses this
+
+const STATUS_OPTIONS = [
+  { value: "not-started", label: "Not started" },
+  { value: "in-progress", label: "In progress" },
+  { value: "completed", label: "Completed" },
+];
+const DEADLINE_OPTIONS = [
+  { value: "overdue", label: "Overdue" },
+  { value: "7d", label: "Next 7 days" },
+  { value: "30d", label: "Next 30 days" },
+  { value: "none", label: "No deadline" },
+];
+const SORT_OPTIONS = [
+  { value: "recent", label: "Recent activity" },
+  { value: "deadline", label: "Nearest deadline" },
+  { value: "progress", label: "Most progress" },
+  { value: "title", label: "Title (A–Z)" },
+];
+
+const iconBtn =
+  "relative inline-flex items-center gap-2 h-11 px-3.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111111] text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-white/5 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500";
 
 const ProjectsWrapper = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
-  const [view, setViewState] = useState<"grid" | "list">(readView);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState<ListParams["status"]>("");
@@ -58,14 +83,7 @@ const ProjectsWrapper = () => {
   const summary = useProjectSummary();
   const { restore } = useProjectMutations();
 
-  const setView = (v: "grid" | "list") => {
-    setViewState(v);
-    try {
-      localStorage.setItem("projects:view", v);
-    } catch {
-      /* private mode: just don't remember it */
-    }
-  };
+  const restoringId: string | null = restore.isPending ? ((restore.variables as string) ?? null) : null;
 
   const reset = <T,>(set: (v: T) => void) => (v: T) => {
     set(v);
@@ -80,6 +98,8 @@ const ProjectsWrapper = () => {
     setDeadline("");
     setPage(1);
   };
+
+  const activeFilters = [category, status, deadline].filter(Boolean).length;
 
   const limit = summary.data?.limit;
   const atLimit = !!limit && limit.max !== null && limit.used >= limit.max;
@@ -137,7 +157,7 @@ const ProjectsWrapper = () => {
       <InvitationsBanner />
       <SummaryCards />
 
-      {/* Tabs + view toggle */}
+      {/* Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" className="flex gap-1 overflow-x-auto rounded-xl bg-neutral-100 dark:bg-white/5 p-1">
           {tabs.map((t) => (
@@ -169,39 +189,16 @@ const ProjectsWrapper = () => {
             </button>
           ))}
         </div>
-        <div className="flex rounded-xl bg-neutral-100 dark:bg-white/5 p-1" role="group" aria-label="Layout">
-          {(
-            [
-              ["grid", LayoutGrid, "Grid view"],
-              ["list", List, "List view"],
-            ] as const
-          ).map(([k, Icon, label]) => (
-            <button
-              key={k}
-              aria-label={label}
-              aria-pressed={view === k}
-              onClick={() => setView(k)}
-              className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center transition cursor-pointer",
-                view === k
-                  ? "bg-white dark:bg-[#1c1c1c] text-violet-700 dark:text-violet-300 shadow-sm"
-                  : "text-neutral-500",
-              )}
-            >
-              <Icon className="w-4 h-4" />
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Filters */}
-      <section className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111111] p-3 sm:p-4 space-y-3">
-        <div className="relative">
+      {/* Toolbar: search on the left, filter + sort on the right */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             value={search}
             onChange={(e) => reset(setSearch)(e.target.value)}
-            placeholder="Search projects by name or description…"
+            placeholder="Search projects…"
             aria-label="Search projects"
             className={cn(fieldClass, "h-11 pl-10 pr-10")}
           />
@@ -215,63 +212,117 @@ const ProjectsWrapper = () => {
             </button>
           )}
         </div>
-        <div className="flex flex-wrap gap-3">
-          <FilterSelect
-            label="Category"
-            value={category}
-            onChange={reset(setCategory)}
-            placeholder="All categories"
-            options={CATEGORIES.map((c) => ({ value: c, label: c }))}
-          />
-          <FilterSelect
-            label="Status"
-            value={status ?? ""}
-            onChange={(v) => reset(setStatus)(v as ListParams["status"])}
-            placeholder="Any status"
-            options={[
-              { value: "not-started", label: "Not started" },
-              { value: "in-progress", label: "In progress" },
-              { value: "completed", label: "Completed" },
-            ]}
-          />
-          <FilterSelect
-            label="Deadline"
-            value={deadline ?? ""}
-            onChange={(v) => reset(setDeadline)(v as ListParams["deadline"])}
-            placeholder="Any time"
-            options={[
-              { value: "overdue", label: "Overdue" },
-              { value: "7d", label: "Next 7 days" },
-              { value: "30d", label: "Next 30 days" },
-              { value: "none", label: "No deadline" },
-            ]}
-          />
-          <FilterSelect
-            label="Sort by"
-            value={sort}
-            onChange={(v) => reset(setSort)(v as typeof sort)}
-            options={[
-              { value: "recent", label: "Recent activity" },
-              { value: "deadline", label: "Nearest deadline" },
-              { value: "progress", label: "Most progress" },
-              { value: "title", label: "Title (A–Z)" },
-            ]}
-          />
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="self-end h-10 px-3 inline-flex items-center gap-1.5 text-sm font-medium text-violet-700 dark:text-violet-300 hover:underline cursor-pointer"
-            >
-              <X className="w-4 h-4" /> Clear filters
-            </button>
-          )}
+
+        <div className="ml-auto flex items-center gap-2">
+          {/* Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={iconBtn} aria-label="Filter projects">
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden sm:inline">Filter</span>
+                {activeFilters > 0 && (
+                  <span className="min-w-5 h-5 px-1 rounded-full bg-violet-600 text-white text-[11px] font-semibold flex items-center justify-center">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  Category{category && <span className="ml-auto pl-3 text-xs text-violet-600">{category}</span>}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="max-h-72 overflow-y-auto">
+                  <DropdownMenuRadioGroup
+                    value={category || ALL}
+                    onValueChange={(v) => reset(setCategory)(v === ALL ? "" : v)}
+                  >
+                    <DropdownMenuRadioItem value={ALL}>All categories</DropdownMenuRadioItem>
+                    {CATEGORIES.map((c) => (
+                      <DropdownMenuRadioItem key={c} value={c}>
+                        {c}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    value={status || ALL}
+                    onValueChange={(v) => reset(setStatus)((v === ALL ? "" : v) as ListParams["status"])}
+                  >
+                    <DropdownMenuRadioItem value={ALL}>Any status</DropdownMenuRadioItem>
+                    {STATUS_OPTIONS.map((o) => (
+                      <DropdownMenuRadioItem key={o.value} value={o.value}>
+                        {o.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Deadline</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    value={deadline || ALL}
+                    onValueChange={(v) => reset(setDeadline)((v === ALL ? "" : v) as ListParams["deadline"])}
+                  >
+                    <DropdownMenuRadioItem value={ALL}>Any time</DropdownMenuRadioItem>
+                    {DEADLINE_OPTIONS.map((o) => (
+                      <DropdownMenuRadioItem key={o.value} value={o.value}>
+                        {o.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              {hasFilters && (
+                <>
+                  <DropdownMenuSeparator />
+                  <button
+                    onClick={clearFilters}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm font-medium text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" /> Clear filters
+                  </button>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Sort */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={iconBtn} aria-label="Sort projects">
+                <ArrowUpDown className="w-4 h-4" />
+                <span className="hidden sm:inline">Sort</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={sort} onValueChange={(v) => reset(setSort)(v as typeof sort)}>
+                {SORT_OPTIONS.map((o) => (
+                  <DropdownMenuRadioItem key={o.value} value={o.value}>
+                    {o.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </section>
+      </div>
 
       {/* Results */}
       {list.isLoading ? (
-        <div className={cn("grid gap-4", view === "grid" ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1")}>
-          {Array.from({ length: view === "grid" ? 6 : 4 }).map((_, i) => (
+        <div className="grid gap-4 grid-cols-1">
+          {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
@@ -316,45 +367,16 @@ const ProjectsWrapper = () => {
         )
       ) : (
         <>
-          <div
-            className={cn(
-              "grid gap-4 transition-opacity",
-              view === "grid" ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1",
-              list.isFetching && "opacity-60",
-            )}
-          >
-            {projects.map((p) => (
-              <ProjectCard
-                key={p._id}
-                project={p}
-                view={view}
-                onRestore={(id) => restore.mutate(id)}
-                restoring={restore.isPending && restore.variables === p._id}
-              />
-            ))}
+          <div className={cn("transition-opacity", list.isFetching && "opacity-60")}>
+            <ProjectTable
+              projects={projects}
+              onRestore={(id) => restore.mutate(id)}
+              restoringId={restoringId}
+            />
           </div>
           <Pagination page={page} totalPages={list.data?.pages ?? 1} onChange={setPage} />
         </>
       )}
-
-      {/* Footer call to action */}
-      <section className="rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20">
-        <span className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-          <Sparkles className="w-5 h-5" />
-        </span>
-        <div className="flex-1">
-          <h3 className="font-semibold">Got a new group assignment?</h3>
-          <p className="text-sm text-white/80">
-            Spin up a team workspace, split the tasks, and keep everyone's progress in one place.
-          </p>
-        </div>
-        <button
-          onClick={startCreate}
-          className="h-10 px-5 rounded-lg bg-white text-violet-700 text-sm font-semibold hover:bg-violet-50 transition cursor-pointer"
-        >
-          Create project
-        </button>
-      </section>
 
       <ProjectFormModal
         open={creating}

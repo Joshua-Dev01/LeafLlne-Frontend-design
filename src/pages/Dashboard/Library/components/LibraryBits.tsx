@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import type { LibraryResource, ResourceStatus } from "../types/libraryTypes";
@@ -79,11 +79,13 @@ export const PersonAvatar = ({
   size?: number;
 }) => {
   const pic = uploaderPicture(resource);
+  const [broken, setBroken] = useState(false);
   const name = uploaderName(resource);
   const style = { width: size, height: size, fontSize: size * 0.38 };
-  return pic ? (
+  return pic && !broken ? (
     <img
       src={pic}
+      onError={() => setBroken(true)}
       alt={name}
       style={style}
       className="rounded-full object-cover shrink-0 bg-neutral-200"

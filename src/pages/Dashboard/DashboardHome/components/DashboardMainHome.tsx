@@ -73,11 +73,13 @@ export default function DashboardMainHome() {
 
   const upcomingEvents = eventsRes?.events ?? [];
   const projects = projectsRes?.projects ?? [];
+  const getProjectTasks = (project: { tasks?: Array<{ status?: string }> } | any) =>
+    Array.isArray(project?.tasks) ? project.tasks : [];
 
   const totalNotesTracked = subjects?.length ?? 0;
   const completedTasks =
     projects.reduce(
-      (sum, p) => sum + p.tasks.filter((t) => t.status === "completed").length,
+      (sum, p) => sum + getProjectTasks(p).filter((t: { status?: string }) => t?.status === "completed").length,
       0
     ) ?? 0;
 
@@ -208,8 +210,9 @@ export default function DashboardMainHome() {
             ) : (
               <div className="space-y-4 mb-4">
                 {projects.map((project) => {
-                  const total = project.tasks.length;
-                  const done = project.tasks.filter((t) => t.status === "completed").length;
+                  const projectTasks = getProjectTasks(project);
+                  const total = projectTasks.length;
+                  const done = projectTasks.filter((t: { status?: string }) => t?.status === "completed").length;
                   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
                   return (
                     <div key={project._id}>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import {
@@ -20,6 +21,7 @@ export const Avatar = ({
   ring?: boolean;
   className?: string;
 }) => {
+  const [broken, setBroken] = useState(false);
   const style = { width: size, height: size, fontSize: Math.max(9, size * 0.38) };
   const base = cn(
     "rounded-full shrink-0 inline-flex items-center justify-center font-semibold text-white select-none",
@@ -27,10 +29,11 @@ export const Avatar = ({
     className,
   );
   if (!person || typeof person !== "object") return <span style={style} className={cn(base, "bg-neutral-300 dark:bg-neutral-700")}>?</span>;
-  if (person.picture && /^https?:\/\//.test(person.picture))
+  if (!broken && person.picture && /^https?:\/\//.test(person.picture))
     return (
       <img
         src={person.picture}
+        onError={() => setBroken(true)}
         alt={person.name}
         title={person.name}
         style={style}
